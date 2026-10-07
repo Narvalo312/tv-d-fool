@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<!--
+============================================================================
+  BIBLE HTML / CSS / JS — AIDE-MÉMOIRE PERSONNEL
+============================================================================
+  Tu n'as jamais fait d'HTML, donc voici un pense-bête que tu peux garder
+  ouvert à côté pendant que tu modifies le fichier. Certains trucs listés
+  ici ne sont PAS utilisés dans ce fichier — c'est volontaire, comme ça tu
+  as une base plus large pour piocher dedans plus tard.
+
+  Structure générale d'une page HTML :
+  - <html> = la page entière
+  - <head> = tout ce qui ne s'affiche pas (titre d'onglet, styles, config)
+  - <body> = tout ce qui s'affiche réellement à l'écran
+  - <style>...</style> = le CSS (l'apparence : couleurs, tailles, position)
+  - <script>...</script> = le JS (le comportement : que se passe-t-il au clic ?)
+
+  ------------------------------------------------------------------------
+  1) SÉLECTEURS CSS (comment cibler un élément pour le styler)
+  ------------------------------------------------------------------------
+  .ma-classe        -> cible tout élément avec class="ma-classe"
+  #mon-id           -> cible l'élément unique avec id="mon-id"
+  div               -> cible TOUTES les balises <div>
+  .parent .enfant   -> cible .enfant seulement s'il est DANS .parent
+  .parent > .enfant -> cible .enfant seulement s'il est un ENFANT DIRECT
+  .a, .b            -> cible .a ET .b (virgule = "ou")
+  [data-action]     -> cible tout élément qui a l'attribut data-action
+  :hover            -> style appliqué quand la souris survole (peu utile
+                       sur tablette tactile, mais bon à savoir)
+  :active           -> style appliqué PENDANT le clic/tap (très utile pour
+                       le feedback tactile qu'on utilise déjà)
+  :disabled         -> style appliqué quand un bouton est désactivé
+  ::before / ::after -> insère du contenu virtuel avant/après un élément
+                       (pas utilisé ici, utile pour des décorations)
+
+  ------------------------------------------------------------------------
+  2) LE "BOX MODEL" (comment Ça prend de la place à l'écran)
+  ------------------------------------------------------------------------
+  Chaque élément HTML est une boîte rectangulaire composée de :
+  - content  : le contenu réel (texte, image...)
+  - padding  : l'espace intérieur, ENTRE le contenu et la bordure
+  - border   : le trait de contour (optionnel)
+  - margin   : l'espace extérieur, ENTRE cette boîte et ses voisines
+
+  box-sizing: border-box;  -> règle qu'on utilise partout (voir plus bas
+                              dans le fichier) : ça fait que padding et
+                              border sont INCLUS dans la largeur/hauteur
+                              qu'on donne, au lieu de s'ajouter par-dessus.
+                              Sans ça, les calculs de taille deviennent
+                              un cauchemar. Règle d'or : toujours l'avoir.
+
+  ------------------------------------------------------------------------
+  3) POSITIONNEMENT (comment placer les éléments)
+  ------------------------------------------------------------------------
+  display: flex;    -> transforme un conteneur en "rangée/colonne
+                        flexible" — les enfants s'alignent et se
+                        répartissent l'espace automatiquement. Utilisé
+                        pour aligner nos boutons proprement.
+  display: grid;    -> comme flex mais pense en GRILLE (lignes + colonnes)
+                        — utilisé pour la grille 2x3 des boutons de mode.
+  position: fixed;  -> sort l'élément du flux normal, le colle à une
+                        position par rapport à l'écran (utilisé pour le
+                        toast de confirmation en bas).
+  gap: 18px;        -> espace entre éléments dans un flex/grid (remplace
+                        le besoin de mettre des margins partout).
+
+  ------------------------------------------------------------------------
+  4) UNITÉS DE MESURE COURANTES
+  ------------------------------------------------------------------------
+  px    -> pixels, taille fixe absolue
+  %     -> pourcentage par rapport au parent
+  vh/vw -> % de la hauteur/largeur totale de l'ÉCRAN (viewport)
+           100vh = toute la hauteur d'écran, peu importe le parent
+  em    -> relatif à la taille de police de l'élément
+  rem   -> relatif à la taille de police de la PAGE entière (plus prévisible
+           que em, souvent préféré pour ça)
+
+  ------------------------------------------------------------------------
+  5) COULEURS
+  ------------------------------------------------------------------------
+  #RRGGBB       -> hex classique (rouge/vert/bleu), ex: #F5D90A
+  #RRGGBBAA     -> hex + alpha (transparence), les 2 derniers caractères
+                   00 = invisible, FF = opaque. Ex: #00000000 = transparent
+  rgba(r,g,b,a) -> même chose mais écrit autrement :
+                   rgba(255, 0, 0, 0.5) = rouge à 50% de transparence
+  transparent   -> mot-clé direct pour "invisible"
+
+  ------------------------------------------------------------------------
+  6) TRANSITIONS / ANIMATIONS (donner du mouvement)
+  ------------------------------------------------------------------------
+  transition: transform 0.08s ease;
+    -> dit au navigateur : "quand la propriété 'transform' change,
+       anime le changement sur 0.08 seconde au lieu de le faire d'un
+       coup sec". C'est ce qui rend le clic sur bouton "doux" au lieu
+       de instantané/brutal.
+  transform: scale(0.95);
+    -> réduit l'élément à 95% de sa taille (effet "j'appuie dessus")
+  transform: translateY(6px);
+    -> déplace l'élément de 6px vers le bas
+  @keyframes nom { from {...} to {...} }
+    -> définit une animation personnalisée plus complexe (pas utilisée
+       ici, mais utile si tu veux un jour un élément qui pulse, tourne,
+       etc. en continu)
+
+  ------------------------------------------------------------------------
+  7) MEDIA QUERIES (adapter selon la taille d'écran)
+  ------------------------------------------------------------------------
+  @media (max-width: 600px) { ... }
+    -> applique le CSS à l'intérieur SEULEMENT si l'écran fait moins de
+       600px de large. Pas utilisé ici car on cible une seule tablette
+       à taille fixe connue, mais indispensable si un jour tu veux que
+       le même fichier s'adapte à plusieurs appareils différents.
+
+  ------------------------------------------------------------------------
+  8) JAVASCRIPT — LE STRICT NÉCESSAIRE
+  ------------------------------------------------------------------------
+  const nom = valeur;        -> déclare une variable qui NE CHANGERA PAS
+  let nom = valeur;          -> déclare une variable qui PEUT changer
+  function nomFonction() {}  -> déclare un bloc de code réutilisable
+  document.querySelector(".x")     -> trouve LE PREMIER élément qui a
+                                       la classe x
+  document.querySelectorAll(".x")  -> trouve TOUS les éléments avec
+                                       la classe x (renvoie une liste)
+  element.addEventListener("click", fonction)
+    -> dit "quand on clique sur cet élément, exécute cette fonction"
+  element.classList.add("nom")     -> ajoute une classe CSS à un élément
+                                       (déclenche visuellement le style
+                                       associé à cette classe)
+  element.classList.remove("nom")  -> retire une classe CSS
+  setTimeout(fonction, 1000)       -> exécute la fonction après 1000ms
+                                       (1 seconde) — utilisé pour faire
+                                       disparaître le toast tout seul
+
+  ------------------------------------------------------------------------
+  9) ERREURS TYPIQUES DE DÉBUTANT (pour gagner du temps)
+  ------------------------------------------------------------------------
+  - Oublier un point-virgule ; en CSS -> casse TOUTE la règle qui suit
+  - Oublier de fermer une accolade { } -> casse tout le reste du fichier
+  - class="x" (HTML) vs .x { } (CSS)  -> en CSS on ajoute un POINT devant
+                                          le nom de la classe, en HTML non
+  - id="x" (HTML) vs #x { } (CSS)     -> pareil mais avec un DIÈSE #
+  - Un id doit être UNIQUE dans toute la page. Une classe peut être
+    réutilisée sur plusieurs éléments.
+
+  ------------------------------------------------------------------------
+  10) IMAGES : CHEMINS RELATIFS (important pour ta tablette)
+  ------------------------------------------------------------------------
+  data-logo="jaune"        -> l'image est dans le MÊME dossier que ce
+                                 fichier HTML (c'est le cas ici)
+  src="images/logo_jaune.svg" -> l'image est dans un sous-dossier "images"
+                                 à côté du HTML
+  src="../logo_jaune.svg"     -> l'image est dans le dossier PARENT
+  Android distingue majuscules et minuscules : "Logo.svg" et "logo.svg"
+  sont deux fichiers différents. Évite aussi les espaces et accents dans
+  les noms de fichiers.
+
+  ------------------------------------------------------------------------
+  11) TACTILE : touch-action (nouveau dans cette version)
+  ------------------------------------------------------------------------
+  touch-action: none;    -> le navigateur ignore les gestes de défilement
+                            et de zoom sur cet élément (les simples taps
+                            fonctionnent toujours)
+  touch-action: pan-y;   -> autorise uniquement le défilement vertical
+  C'est la méthode propre pour bloquer les swipes. L'ancienne méthode
+  (annuler tous les "touchmove" en JS) annulait aussi les taps dès que le
+  doigt bougeait d'un pixel, d'où des clics qui ne se déclenchaient pas.
+============================================================================
+-->
+<html lang="fr">
+
+<head>
+<meta charset="UTF-8">
+
+<!-- Police "Unbounded" chargée depuis Google Fonts (nécessite internet).
+     Sans connexion, le navigateur utilise la police de secours sans-serif
+     indiquée dans font-family : la page reste utilisable, juste moins
+     jolie. preconnect = ouvre la connexion aux serveurs de polices en
+     avance (gain de vitesse). -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;800&display=swap" rel="stylesheet">
+<!-- Cette ligne empêche le zoom tactile accidentel sur tablette -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>d-fool — Piscine à balles</title>
+<style>
+
+  /* ====================================================================
+     VARIABLES DE COULEUR
+     On les déclare une fois ici, puis on les réutilise partout via
+     var(--nom). Avantage : pour changer une couleur dans TOUT le fichier,
+     tu ne modifies qu'UNE ligne ici, pas 20 lignes éparpillées.
+     ==================================================================== */
+  :root {
+    --bg: #14141C;              /* fond principal (anthracite) */
+    --bg-card: #1E1E29;         /* fond des boutons de mode */
+    --yellow: #FFC200;          /* accent jaune */
+    --purple-d-fool: #8D1680;   /* accent violet d-fool */
+    --cyan: #86D2CB;            /* accent cyan */
+    --rouge: #FF0200;           /* accent rouge */
+    --off-white: #F2F0EA;       /* texte principal */
+    --madang: #C8E39D;          /* madang */
+    --border-subtle: #2C2C3A;   /* bordure discrète des boutons */
+    --app-height: 100vh;        /* hauteur du viewport visible, ajustée en JS */
+  }
+
+  /* ====================================================================
+     RESET GLOBAL
+     Chaque navigateur applique des styles par défaut différents
+     (marges, tailles...). On les remet tous à zéro ici pour repartir
+     d'une base propre et identique partout.
+     ==================================================================== */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box; /* voir "Box Model" dans la bible plus haut */
+    -webkit-tap-highlight-color: transparent; /* enlève le flash gris au tap */
+    font: inherit; /* évite que le texte change de police sur Android au tap */
+    -webkit-user-select: none; /* empêche de sélectionner le texte comme
+                                   dans un traitement de texte */
+    user-select: none;
+  }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    min-height: 100vh;
+    overflow: hidden; /* empêche tout scroll — indispensable en kiosk */
+    touch-action: none; /* bloque swipe et zoom, SANS annuler les taps
+                            (voir section 11 de la bible) */
+    background: var(--bg);
+    font-family: "Unbounded", sans-serif;
+    color: var(--off-white);
+  }
+
+  body {
+    display: flex;              /* voir "Positionnement" dans la bible */
+    flex-direction: column;     /* empile les enfants verticalement */
+    justify-content: flex-start; /* reste toujours en haut quand la page s'étire */
+    align-items: stretch;       /* les enfants prennent toute la largeur */
+    height: var(--app-height, 100vh); /* suit la vraie hauteur visible du navigateur */
+    min-height: var(--app-height, 100vh);
+    max-height: var(--app-height, 100vh);
+    padding: 28px 24px 32px;    /* haut / droite-gauche / bas */
+  }
+
+  /* ====================================================================
+     EN-TÊTE (logo + titre)
+     ==================================================================== */
+  header {
+    text-align: center;
+    padding-bottom: 24px;
+    flex-shrink: 0; /* empêche le header de rétrécir si l'espace manque */
+  }
+
+  .brand {
+    font-size: 15px;
+    font-weight: 800;     /* 800 = très gras (l'échelle va de 100 à 900) */
+    letter-spacing: 3px;  /* espace entre les lettres, effet "logo" */
+    color: var(--yellow);
+    margin-bottom: 6px;
+  }
+
+  h1 {
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1.2; /* hauteur de ligne, évite que le texte soit trop
+                          "collé" verticalement si ça passe sur 2 lignes */
+  }
+
+  .subtitle {
+    margin-top: 8px;
+    font-size: 15px;
+    color: #8A8A98;
+    font-weight: 500;
+  }
+
+  /* ====================================================================
+     ZONE D'EXPLICATION (fixe)
+     --------------------------------------------------------------------
+     Hauteur FIXE (pas min-height, pas max-height : "height" tout court).
+     Elle ne change JAMAIS de taille, ni avant ni après qu'un mode soit
+     choisi. Si un texte est trop long pour tenir dedans, il défile TOUT
+     SEUL à l'intérieur (overflow-y: auto) — mais l'extérieur ne bouge
+     jamais.
+     ==================================================================== */
+  .detail {
+    flex-shrink: 0;         /* ne se laisse jamais écraser par le reste */
+    height: 190px;          /* hauteur FIXE. Si tes textes sont souvent
+                                longs, augmente cette valeur (ex: 220px). */
+    margin-bottom: 18px;
+    padding: 18px 22px;
+    background: var(--bg-card);
+    border: 2px solid var(--border-subtle);
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    overflow-y: auto;       /* filet de sécurité : défilement interne si
+                                un texte dépasse les 190px */
+    touch-action: pan-y;    /* autorise le défilement vertical ICI
+                                seulement (voir section 11 de la bible) */
+    text-align: center;
+    transition: border-color 0.12s ease;
+  }
+
+  /* Ajoutée en JS dès qu'un mode a été choisi (une fois pour toutes) */
+  .detail.filled {
+    border-color: var(--yellow);
+  }
+
+  .detail-text {
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--off-white);
+  }
+  /* Tant qu'aucun mode n'a encore été choisi, le texte par défaut
+     ("Touche un mode...") reste gris plutôt que blanc */
+  .detail:not(.filled) .detail-text {
+    color: #8A8A98;
+  }
+
+  /* ====================================================================
+     GRILLE DES MODES (2 colonnes x 3 lignes)
+     --------------------------------------------------------------------
+     Chaque case est un simple bouton de taille FIXE. La taper ne la
+     fait ni grandir ni bouger : ça la sélectionne juste (bordure jaune)
+     et ça recopie son explication cachée dans la zone fixe ci-dessus
+     (voir le JS, fonction sur .mode-card).
+     ==================================================================== */
+  .modes {
+    flex: 1; /* prend tout l'espace vertical restant disponible */
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* 2 colonnes de largeur égale */
+    gap: 18px;
+    align-content: center; /* centre verticalement la grille dans .modes */
+  }
+
+  .mode-card {
+    background: var(--bg-card);
+    border: 2px solid var(--border-subtle);
+    border-radius: 20px;
+    min-height: 150px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: transform 0.08s ease, background 0.08s ease, border-color 0.08s ease;
+  }
+
+  .mode-card:active,
+  .mode-card.pressed {
+    transform: scale(0.95);
+    background: #26263A;
+  }
+
+  /* Ajoutée en JS sur la case tapée en dernier (retirée des autres) */
+  .mode-card.selected {
+    border-color: var(--yellow);
+    background: #26263A;
+  }
+
+  .mode-card .icon {
+    width: 56px;
+    height: 56px;
+    object-fit: contain;  /* garde les proportions du logo */
+  }
+
+  .mode-card .label {
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+  }
+
+  /* Couleur du label selon data-color (attribut posé sur .mode-card) */
+  .mode-card[data-color="yellow"] .label { color: var(--yellow); }
+  .mode-card[data-color="cyan"]   .label { color: var(--cyan); }
+
+  /* Piège classique : notre propre règle ".launch { display: block }"
+     ci-dessous écraserait l'attribut HTML "hidden" (qui met
+     display:none) si on ne le précisait pas explicitement ici. */
+  .launch[hidden] {
+    display: none;
+  }
+
+  .launch {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    background: var(--yellow);
+    color: var(--bg);
+    border: none;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+    transition: transform 0.08s ease, filter 0.08s ease;
+  }
+  .launch:active,
+  .launch.pressed {
+    transform: scale(0.97);
+    filter: brightness(0.9);
+  }
+
+  .toast {
+    position: fixed; /* détaché du flux normal, positionné par rapport
+                         à l'écran entier, pas au parent */
+    left: 50%;
+    bottom: -80px; /* caché sous l'écran par défaut */
+    transform: translateX(-50%); /* astuce classique pour centrer
+                                     horizontalement un élément dont on
+                                     ne connaît pas la largeur exacte */
+    background: var(--bg-card);
+    border: 2px solid var(--yellow);
+    color: var(--off-white);
+    padding: 14px 26px;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 15px;
+    opacity: 0;
+    transition: bottom 0.25s ease, opacity 0.25s ease;
+    pointer-events: none; /* le toast ne bloque jamais les clics, même
+                              par-dessus les boutons */
+    white-space: nowrap; /* empêche le texte de passer à la ligne */
+  }
+
+  /* .show est ajoutée/retirée en JS pour faire apparaître/disparaître
+     le toast — c'est le changement de "bottom" et "opacity" qui,
+     combiné à la transition ci-dessus, crée l'effet de glissement */
+  .toast.show {
+    bottom: 24px;
+    opacity: 1;
+  }
+</style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">D-FOOL · AWANS</div>
+    <h1>Piscine à balles</h1>
+    <div class="subtitle">Choisis ton mode de jeu</div>
+  </header>
+
+  <!--
+    ZONE D'EXPLICATION — toujours à la même place, toujours la même
+    hauteur (voir .detail en CSS). Taper une case plus bas ne fait QUE
+    remplir ce texte et afficher le bouton (voir le JS) : rien d'autre
+    à l'écran ne bouge.
+  -->
+  <div class="detail" id="detail">
+    <p class="detail-text" id="detailText">Touche un mode ci-dessous pour voir ses règles.</p>
+    <button class="launch" id="launchBtn" data-action="" hidden>&#9654;&nbsp;Lancer ce mode</button>
+  </div>
+
+  <!--
+    UNE CASE = un seul <button class="mode-card">, qui contient :
+      - l'icône et le label (affichés normalement)
+      - <span class="explication" hidden> -> TON texte de règles. Il est
+        caché à l'écran (attribut "hidden"), mais le JS va le LIRE quand
+        tu tapes la case, et le recopier dans la zone fixe au-dessus.
+    data-color="yellow|cyan" -> couleur du label.
+    data-action="modeX"      -> ce que Tasker lira quand tu confirmeras
+                                 avec "Lancer ce mode" dans la zone du haut.
+                                 Si tu renommes "modeX", renomme aussi le
+                                 motif "*modeX*" côté Tasker.
+    data-logo="jaune"     -> chemin RELATIF : l'image doit être dans le
+                                 MÊME dossier que ce fichier HTML.
+    alt="" vide volontairement : le logo est décoratif, le nom du mode
+                                 est déjà écrit juste à côté.
+  -->
+  <div class="modes">
+
+    <button class="mode-card" data-color="yellow" data-action="mode1">
+      <img class="icon" data-logo="jaune" alt="">
+      <span class="label">2 couleurs</span>
+      <span class="explication" hidden>Bataille de 2 couleurs, gagnant = max au bout d'une minute</span>
+    </button>
+
+    <button class="mode-card" data-color="cyan" data-action="mode2">
+      <img class="icon" data-logo="original" alt="">
+      <span class="label">3 couleurs</span>
+      <span class="explication" hidden>Bataille de 3 couleurs, gagnant = max au bout d'une minute</span>
+    </button>
+
+    <button class="mode-card" data-color="yellow" data-action="mode3">
+      <img class="icon" data-logo="jaune" alt="">
+      <span class="label">4 couleurs</span>
+      <span class="explication" hidden>Bataille de 4 couleurs, gagnant = max au bout d'une minute</span>
+    </button>
+
+    <button class="mode-card" data-color="cyan" data-action="mode4">
+      <img class="icon" data-logo="original" alt="">
+      <span class="label">5 couleurs</span>
+      <span class="explication" hidden>Bataille de 5 couleurs, gagnant = max au bout d'une minute</span>
+    </button>
+
+    <button class="mode-card" data-color="yellow" data-action="mode5">
+      <img class="icon" data-logo="jaune" alt="">
+      <span class="label">6 couleurs</span>
+      <span class="explication" hidden>Bataille de 6 couleurs, gagnant = max au bout d'une minute</span>
+    </button>
+
+    <button class="mode-card" data-color="cyan" data-action="mode6">
+      <img class="icon" data-logo="original" alt="">
+      <span class="label">Cycles à éteindre</span>
+      <span class="explication" hidden>Tous les buzzers s'allument, éteins tout 3 fois</span>
+    </button>
+
+  </div>
+
+
+  <!-- Élément vide au départ — le JS remplit son texte et le fait
+       apparaître/disparaître au moment du clic -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    /* LOGOS INTÉGRÉS (base64) : les SVG sont codés en texte directement
+       dans ce fichier -> zéro dépendance à un dossier, marche en mode Fichier
+       de Tasker. Pour changer un logo : remplace la chaîne base64 ou ajoute
+       une entrée (ex. bleu: "data:image/svg+xml;base64,...") puis mets
+       data-logo="bleu" sur l'<img>. */
+    const LOGOS = {
+      jaune: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODEyIiBoZWlnaHQ9IjEwMTIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHhtbDpzcGFjZT0icHJlc2VydmUiIG92ZXJmbG93PSJoaWRkZW4iPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKC0yMTIgMjA4KSI+PGc+PGc+PGc+PGc+PHBhdGggZD0iTTM3OC45ODggODA3LjYzMyAzODguODM4IDgwNS41ODFDMzg5LjQ1MyA4MDcuMDE4IDM5MC4yNzQgODA4LjI0OSAzOTEuNTA1IDgwOS4wNjkgMzkyLjczNiA4MDkuODkgMzk0LjM3OCA4MTAuNTA2IDM5Ni4yMjUgODEwLjcxMSAzOTguMDcxIDgxMC45MTYgNDAwLjMyOCA4MTAuOTE2IDQwMi41ODUgODEwLjMwMSA0MDYuMDc0IDgwOS42ODUgNDA4LjUzNiA4MDguNjU5IDQxMC4zODMgODA3LjIyMyA0MTIuMjI5IDgwNS43ODYgNDEyLjg0NSA4MDQuMTQ1IDQxMi40MzUgODAyLjUwMyA0MTIuMjI5IDgwMS4wNjcgNDExLjQwOSA4MDAuMDQxIDQxMC4xNzcgNzk5LjYzMSA0MDguOTQ2IDc5OS4wMTUgNDA2LjY4OSA3OTkuMDE1IDQwMy42MTEgNzk5LjIyTDM5NC43ODggODAwLjA0MUMzODkuMDQzIDgwMC40NTEgMzg0LjczNCA4MDAuMDQxIDM4MS44NjEgNzk4LjQgMzc4Ljk4OCA3OTYuNzU4IDM3Ny4xNDIgNzk0LjI5NiAzNzYuMzIxIDc5MC42MDIgMzc1LjcwNSA3ODcuNzMgMzc2LjExNiA3ODUuMDYyIDM3Ny4zNDcgNzgyLjgwNSAzNzguNTc4IDc4MC4zNDMgMzgwLjYzIDc3OC40OTYgMzgzLjUwMyA3NzYuNjQ5IDM4Ni4zNzUgNzc0LjgwMyAzODkuNjU4IDc3My43NzcgMzkzLjc2MiA3NzIuOTU2IDM5Ny42NjEgNzcyLjEzNSA0MDEuMzU0IDc3Mi4xMzUgNDA0LjYzNyA3NzIuNTQ1IDQwNy45MiA3NzMuMTYxIDQxMC43OTMgNzc0LjM5MiA0MTMuMDUgNzc2LjAzNCA0MTUuMzA3IDc3Ny44OCA0MTYuNzQ0IDc4MC4xMzggNDE3LjU2NCA3ODMuMDFMNDA3LjcxNSA3ODUuMDYyQzQwNy4zMDUgNzgzLjgzMSA0MDYuNDg0IDc4Mi44MDUgNDA1LjI1MyA3ODEuOTg0IDQwNC4yMjcgNzgxLjE2NCA0MDIuNzkxIDc4MC43NTMgNDAwLjk0NCA3ODAuNTQ4IDM5OS4wOTcgNzgwLjM0MyAzOTcuMjUgNzgwLjU0OCAzOTQuOTkzIDc4MC45NTggMzkxLjkxNSA3ODEuNTc0IDM4OS40NTMgNzgyLjYgMzg3LjgxMiA3ODMuODMxIDM4Ni4xNyA3ODUuMDYyIDM4NS41NTUgNzg2LjcwNCAzODUuNzYgNzg4LjM0NSAzODUuOTY1IDc4OS41NzYgMzg2Ljc4NiA3OTAuNjAyIDM4OC4wMTcgNzkxLjAxMyAzODkuMjQ4IDc5MS40MjMgMzkxLjMgNzkxLjYyOCAzOTQuMTczIDc5MS40MjNMNDAzLjQwNiA3OTAuODA3QzQwNy41MSA3OTAuMzk3IDQxMC43OTMgNzkwLjYwMiA0MTMuMjU1IDc5MS4wMTMgNDE1LjcxOCA3OTEuNDIzIDQxNy43NyA3OTIuNDQ5IDQxOS4wMDEgNzkzLjg4NSA0MjAuMjMyIDc5NS4zMjIgNDIxLjI1OCA3OTcuMTY4IDQyMS42NjggNzk5LjYzMSA0MjIuMjg0IDgwMi41MDMgNDIxLjg3MyA4MDUuMzc2IDQyMC42NDIgODA3LjgzOCA0MTkuNDExIDgxMC4zMDEgNDE3LjE1NCA4MTIuNTU4IDQxNC4yODEgODE0LjQwNCA0MTEuNDA5IDgxNi4yNTEgNDA3LjkyIDgxNy40ODIgNDAzLjYxMSA4MTguNTA4IDM5OS4zMDIgODE5LjMyOSAzOTUuNDA0IDgxOS41MzQgMzkxLjkxNSA4MTguOTE5IDM4OC40MjcgODE4LjMwMyAzODUuNTU1IDgxNy4wNzIgMzgzLjA5MiA4MTUuMDIgMzgxLjI0NiA4MTMuMTczIDM3OS44MDkgODEwLjcxMSAzNzguOTg4IDgwNy42MzNaIiBmaWxsPSIjZmZjMjAwIiBmaWxsLXJ1bGU9Im5vbnplcm8iIGZpbGwtb3BhY2l0eT0iMSIgdHJhbnNmb3JtPSJtYXRyaXgoMSAwIDAgMS4wMDA4MyAyMTIuNTU1IC0yMDcpIi8+PHBhdGggZD0iTTQ0NS44ODEgNzYzLjUxN0M0NDkuMzY5IDc2Mi45MDEgNDUyLjI0MiA3NjIuOTAxIDQ1NS4xMTQgNzYzLjUxNyA0NTcuNzgyIDc2NC4xMzMgNDYwLjAzOSA3NjUuNTY5IDQ2MS44ODYgNzY3LjQxNiA0NjMuNzMyIDc2OS4yNjIgNDY0Ljc1OCA3NzEuNzI1IDQ2NS4zNzQgNzc0LjU5NyA0NjUuOTkgNzc3LjQ3IDQ2NS43ODQgNzgwLjEzOCA0NjQuOTY0IDc4Mi42IDQ2NC4xNDMgNzg1LjA2MiA0NjIuNTAxIDc4Ny4xMTQgNDYwLjI0NCA3ODguNzU2IDQ1Ny45ODcgNzkwLjM5NyA0NTUuMTE0IDc5MS42MjggNDUxLjgzMSA3OTIuNDQ5TDQzMi45NTQgNzk2LjE0MiA0MzEuMzEyIDc4Ny45MzUgNDQ5Ljc3OSA3ODQuMjQxQzQ1Mi4wMzcgNzgzLjgzMSA0NTMuNjc4IDc4Mi44MDUgNDU0LjcwNCA3ODEuNTc0IDQ1NS43MyA3ODAuMTM4IDQ1Ni4xNCA3NzguNDk2IDQ1NS43MyA3NzYuNjQ5IDQ1NS4zMiA3NzQuNTk3IDQ1NC4yOTQgNzczLjE2MSA0NTIuODU3IDc3Mi4zNCA0NTEuNDIxIDc3MS41MTkgNDQ5LjU3NCA3NzEuMzE0IDQ0Ny4zMTcgNzcxLjcyNUw0MjkuNjcxIDc3NS4yMTMgNDMzLjE1OSA3NjkuNjczIDQ0MS4xNjEgODEwLjA5NSA0MzEuNTE3IDgxMS45NDIgNDIyLjY5NCA3NjguMDMxIDQ0NS44ODEgNzYzLjUxN1oiIGZpbGw9IiNmZmMyMDAiIGZpbGwtcnVsZT0ibm9uemVybyIgZmlsbC1vcGFjaXR5PSIxIiB0cmFuc2Zvcm09Im1hdHJpeCgxIDAgMCAxLjAwMDgzIDIxMi41NTUgLTIwNykiLz48cGF0aCBkPSJNNTAwLjA1MSA3OTkuNDI2QzQ5NS4xMjcgODAwLjQ1MSA0OTAuNDA3IDgwMC4yNDYgNDg2LjMwMyA3OTkuMjIgNDgyLjIgNzk3Ljk4OSA0NzguNzExIDc5NS45MzcgNDc1LjgzOSA3OTMuMDY1IDQ3Mi45NjYgNzg5Ljk4NyA0NzEuMTE5IDc4Ni4yOTMgNDcwLjI5OSA3ODEuNzc5IDQ2OS40NzggNzc3LjI2NSA0NjkuNjgzIDc3Mi45NTYgNDcxLjExOSA3NjkuMjYyIDQ3Mi41NTYgNzY1LjM2NCA0NzUuMDE4IDc2Mi4wODEgNDc4LjMwMSA3NTkuNDEzIDQ4MS41ODQgNzU2Ljc0NiA0ODUuODkzIDc1NC44OTkgNDkwLjgxOCA3NTMuODczIDQ5NS43NDIgNzUyLjg0NyA1MDAuNDYyIDc1My4wNTIgNTA0LjU2NiA3NTQuMDc4IDUwOC42NjkgNzU1LjMwOSA1MTIuMTU4IDc1Ny4zNjEgNTE1LjAzIDc2MC4yMzQgNTE3LjkwMyA3NjMuMzEyIDUxOS43NSA3NjcuMDA1IDUyMC41NyA3NzEuNTE5IDUyMS4zOTEgNzc2LjAzNCA1MjEuMTg2IDc4MC4zNDMgNTE5Ljc1IDc4NC4wMzYgNTE4LjMxMyA3ODcuOTM1IDUxNS44NTEgNzkxLjIxOCA1MTIuNTY4IDc5My44ODUgNTA5LjI4NSA3OTYuNTUzIDUwNC45NzYgNzk4LjQgNTAwLjA1MSA3OTkuNDI2Wk00OTguMjA1IDc5MC42MDJDNTAxLjI4MiA3ODkuOTg3IDUwMy45NSA3ODguOTYxIDUwNi4wMDIgNzg3LjMxOSA1MDguMDU0IDc4NS42NzggNTA5LjQ5IDc4My44MzEgNTEwLjMxMSA3ODEuMzY5IDUxMS4xMzIgNzc5LjExMiA1MTEuMzM3IDc3Ni40NDQgNTEwLjcyMSA3NzMuNTcxIDUxMC4xMDYgNzcwLjY5OSA1MDkuMDggNzY4LjQ0MiA1MDcuNDM4IDc2Ni41OTUgNTA1Ljc5NyA3NjQuNzQ4IDUwMy43NDUgNzYzLjUxNyA1MDEuMjgyIDc2Mi42OTYgNDk4LjgyIDc2Mi4wODEgNDk1Ljk0NyA3NjIuMDgxIDQ5Mi44NyA3NjIuNjk2IDQ4OS43OTIgNzYzLjMxMiA0ODcuMTI0IDc2NC4zMzggNDg1LjA3MiA3NjUuOTc5IDQ4My4wMiA3NjcuNjIxIDQ4MS41ODQgNzY5LjQ2OCA0ODAuNzYzIDc3MS45MyA0NzkuOTQzIDc3NC4zOTIgNDc5LjczNyA3NzYuODU0IDQ4MC4zNTMgNzc5LjcyNyA0ODAuOTY5IDc4Mi42IDQ4MS45OTQgNzg0Ljg1NyA0ODMuNjM2IDc4Ni43MDQgNDg1LjI3OCA3ODguNTUgNDg3LjMyOSA3ODkuNzgxIDQ4OS45OTcgNzkwLjYwMiA0OTIuNDU5IDc5MS4yMTggNDk1LjEyNyA3OTEuMjE4IDQ5OC4yMDUgNzkwLjYwMloiIGZpbGw9IiNmZmMyMDAiIGZpbGwtcnVsZT0ibm9uemVybyIgZmlsbC1vcGFjaXR5PSIxIiB0cmFuc2Zvcm09Im1hdHJpeCgxIDAgMCAxLjAwMDgzIDIxMi41NTUgLTIwNykiLz48cGF0aCBkPSJNNTMzLjQ5NyA3NjYuMzkgNTUwLjExOCA3NjMuMTA3QzU1Mi4zNzUgNzYyLjY5NiA1NTQuMDE3IDc2MS44NzUgNTU1LjA0MyA3NjAuNDM5IDU1Ni4wNjkgNzU5LjAwMyA1NTYuNDc5IDc1Ny41NjYgNTU2LjA2OSA3NTUuNzIgNTU1LjY1OCA3NTMuODczIDU1NC44MzcgNzUyLjY0MiA1NTMuMTk2IDc1MS44MjEgNTUxLjc2IDc1MSA1NDkuOTEzIDc1MC43OTUgNTQ3LjY1NiA3NTEuNDExTDUyOS41OTkgNzU0Ljg5OSA1MzMuMDg3IDc0OC45NDggNTQxLjI5NSA3OTAuMTkyIDUzMS42NTEgNzkyLjAzOSA1MjIuODI4IDc0OC4xMjggNTQ3LjI0NSA3NDMuMjAzQzU1MC4zMjMgNzQyLjU4NyA1NTMuMTk2IDc0Mi41ODcgNTU1Ljg2MyA3NDMuMjAzIDU1OC41MzEgNzQzLjgxOSA1NjAuNTgzIDc0NS4wNSA1NjIuNDMgNzQ2Ljg5NiA1NjQuMDcxIDc0OC43NDMgNTY1LjMwMiA3NTEgNTY1LjkxOCA3NTMuNjY4IDU2Ni41MzMgNzU2LjMzNSA1NjYuMzI4IDc1OC43OTggNTY1LjMwMiA3NjEuMjYgNTY0LjI3NiA3NjMuNTE3IDU2Mi44NCA3NjUuNTY5IDU2MC43ODggNzY3LjIxIDU1OC43MzYgNzY4Ljg1MiA1NTYuMDY5IDc2OS44NzggNTUyLjc4NSA3NzAuNDk0TDUzNS4xMzkgNzczLjk4MiA1MzMuNDk3IDc2Ni4zOVpNNTQxLjcwNSA3NjguODUyIDU1Mi43ODUgNzY2LjU5NSA1NzMuMDk5IDc4NC4wMzYgNTYxLjYwOSA3ODYuMjkzIDU0MS43MDUgNzY4Ljg1MloiIGZpbGw9IiNmZmMyMDAiIGZpbGwtcnVsZT0ibm9uemVybyIgZmlsbC1vcGFjaXR5PSIxIiB0cmFuc2Zvcm09Im1hdHJpeCgxIDAgMCAxLjAwMDgzIDIxMi41NTUgLTIwNykiLz48cGF0aCBkPSJNNTY1LjcxMyA3MzkuNzE1IDYwOS42MjQgNzMwLjg5MiA2MTEuNDcgNzM5LjcxNSA1NjcuNTU5IDc0OC41MzggNTY1LjcxMyA3MzkuNzE1Wk01ODMuNzY5IDc0MC43NDEgNTkzLjQxMyA3MzguODk0IDYwMS4yMTEgNzc4LjQ5NiA1OTEuNTY3IDc4MC4zNDMgNTgzLjc2OSA3NDAuNzQxWiIgZmlsbD0iI2ZmYzIwMCIgZmlsbC1ydWxlPSJub256ZXJvIiBmaWxsLW9wYWNpdHk9IjEiIHRyYW5zZm9ybT0ibWF0cml4KDEgMCAwIDEuMDAwODMgMjEyLjU1NSAtMjA3KSIvPjxwYXRoIGQ9Ik00MjguMjM0IDg1Ny43IDQzOC4yODkgODU1LjY0OCA0MjguODUgODczLjI5NEM0MjcuNDE0IDg3NS43NTcgNDI1Ljk3NyA4NzguMDE0IDQyNC4zMzYgODc5Ljg2IDQyMi42OTQgODgxLjcwNyA0MjAuODQ3IDg4My4xNDQgNDE5LjAwMSA4ODQuMTY5IDQxNi45NDkgODg1LjE5NSA0MTQuNDg3IDg4Ni4wMTYgNDExLjgxOSA4ODYuNjMyIDQwOC4zMzEgODg3LjI0NyA0MDUuMjUzIDg4Ny4yNDcgNDAyLjU4NSA4ODYuNjMyIDM5OS45MTggODg2LjAxNiAzOTcuNjYxIDg4NC43ODUgMzk2LjAxOSA4ODMuMTQ0IDM5NC4zNzggODgxLjUwMiAzOTMuMTQ3IDg3OS40NSAzOTIuNzM2IDg3Ni45ODggMzkyLjMyNiA4NzQuNzMxIDM5Mi41MzEgODcyLjY3OSAzOTMuMTQ3IDg3MC42MjcgMzkzLjk2NyA4NjguNTc1IDM5NS40MDQgODY2LjcyOCAzOTcuNDU2IDg2NS4wODcgMzk5LjUwOCA4NjMuNDQ1IDQwMi4zOCA4NjIuMDA5IDQwNi4wNzQgODYwLjc3OEw0MDguOTQ2IDg2NC4yNjZDNDA2LjI3OSA4NjUuNDk3IDQwNC40MzIgODY2LjkzMyA0MDMuMjAxIDg2OC41NzUgNDAxLjk3IDg3MC4yMTcgNDAxLjU1OSA4NzIuMDYzIDQwMS45NyA4NzMuOTEgNDAyLjE3NSA4NzUuMTQxIDQwMi43OTEgODc2LjE2NyA0MDMuNjExIDg3Ni45ODggNDA0LjQzMiA4NzcuODA5IDQwNS42NjMgODc4LjQyNCA0MDYuODk0IDg3OC44MzUgNDA4LjMzMSA4NzkuMjQ1IDQwOS43NjcgODc5LjI0NSA0MTEuNDA5IDg3OC44MzUgNDE0LjI4MSA4NzguMjE5IDQxNi41MzggODc3LjE5MyA0MTguMTggODc1Ljc1NyA0MTkuODIyIDg3NC4zMiA0MjEuMjU4IDg3Mi4yNjggNDIyLjI4NCA4NzAuMjE3TDQyOC4yMzQgODU3LjdaTTQyOC4wMjkgODQ5LjI4NyA0MTguNTkgODUxLjEzNEM0MTcuOTc1IDg0OS4yODcgNDE2Ljk0OSA4NDguMDU2IDQxNS41MTIgODQ3LjIzNSA0MTQuMDc2IDg0Ni40MTQgNDEyLjAyNCA4NDYuMjA5IDQwOS43NjcgODQ2LjYyIDQwOC4zMzEgODQ2LjgyNSA0MDcuMzA1IDg0Ny4yMzUgNDA2LjI3OSA4NDcuODUxIDQwNS40NTggODQ4LjQ2NiA0MDQuNjM3IDg0OS4wODIgNDA0LjIyNyA4NDkuOTAzIDQwMy44MTcgODUwLjcyMyA0MDMuNjExIDg1MS41NDQgNDAzLjgxNyA4NTIuNTcgNDA0LjAyMiA4NTMuMTg2IDQwNC40MzIgODU0LjAwNiA0MDUuMDQ4IDg1NC42MjIgNDA1LjY2MyA4NTUuNDQzIDQwNi42ODkgODU2LjA1OCA0MDcuOTIgODU2Ljg3OUw0NDUuNjc2IDg3OC42MjkgNDMzLjU2OSA4ODEuMDkyIDQwMS4zNTQgODYyLjgzQzM5OS4zMDIgODYxLjU5OCAzOTcuNDU2IDg2MC4zNjcgMzk2LjIyNSA4NTguOTMxIDM5NC43ODggODU3LjQ5NSAzOTMuOTY3IDg1NS44NTMgMzkzLjU1NyA4NTQuMjEyIDM5My4xNDcgODUxLjk1NSAzOTMuMzUyIDg0OS45MDMgMzk0LjM3OCA4NDguMDU2IDM5NS40MDQgODQ2LjIwOSAzOTcuMDQ1IDg0NC4zNjIgMzk5LjMwMiA4NDMuMTMxIDQwMS41NTkgODQxLjY5NSA0MDQuNDMyIDg0MC42NjkgNDA3LjkyIDg0MC4wNTMgNDExLjYxNCA4MzkuMjMzIDQxNC42OTIgODM5LjIzMyA0MTcuNTY0IDgzOS44NDggNDIwLjQzNyA4NDAuNDY0IDQyMi42OTQgODQxLjY5NSA0MjQuMzM2IDg0My4zMzYgNDI2LjE4MiA4NDQuNzczIDQyNy40MTQgODQ2LjgyNSA0MjguMDI5IDg0OS4yODdaIiBmaWxsPSIjZmZjMjAwIiBmaWxsLXJ1bGU9Im5vbnplcm8iIGZpbGwtb3BhY2l0eT0iMSIgdHJhbnNmb3JtPSJtYXRyaXgoMSAwIDAgMS4wMDA4MyAyMTIuNTU1IC0yMDcpIi8+PHBhdGggZD0iTTQ4OS43OTIgODI0LjQ1OSA0OTEuNDMzIDgzMy4wNzcgNDU5LjQyMyA4MzkuNDM4IDQ2My4zMjIgODMzLjI4MiA0NzEuMzI1IDg3My43MDUgNDYxLjY4MSA4NzUuNTUyIDQ1Mi44NTcgODMxLjY0MSA0ODkuNzkyIDgyNC40NTlaTTQ2MS40NzUgODQ5LjQ5MiA0OTIuNDU5IDg0My4zMzYgNDk0LjEwMSA4NTEuNzQ5IDQ2My4xMTcgODU3LjkwNSA0NjEuNDc1IDg0OS40OTJaIiBmaWxsPSIjZmZjMjAwIiBmaWxsLXJ1bGU9Im5vbnplcm8iIGZpbGwtb3BhY2l0eT0iMSIgdHJhbnNmb3JtPSJtYXRyaXgoMSAwIDAgMS4wMDA4MyAyMTIuNTU1IC0yMDcpIi8+PHBhdGggZD0iTTUxMC4zMTEgODQ2LjAwNEM1MTAuNzIxIDg0OC4yNjEgNTExLjU0MiA4NTAuMzEzIDUxMi43NzMgODUxLjc0OSA1MTQuMDA0IDg1My4xODYgNTE1LjQ0MSA4NTQuMjEyIDUxNy40OTMgODU0LjgyNyA1MTkuNTQ0IDg1NS40NDMgNTIxLjU5NiA4NTUuNDQzIDUyMy44NTQgODU1LjAzMiA1MjYuMzE2IDg1NC42MjIgNTI4LjM2OCA4NTMuNTk2IDUyOS44MDQgODUyLjM2NSA1MzEuMjQgODUxLjEzNCA1MzIuMjY2IDg0OS40OTIgNTMyLjg4MiA4NDcuNjQ2IDUzMy40OTcgODQ1Ljc5OSA1MzMuNDk3IDg0My43NDcgNTMzLjA4NyA4NDEuMjg1TDUyOC4xNjMgODE2LjY2MiA1MzcuODA3IDgxNC44MTUgNTQyLjczMSA4NDAuMDUzQzU0My41NTIgODQzLjk1MiA1NDMuMzQ3IDg0Ny42NDYgNTQyLjExNiA4NTAuOTI5IDU0MC44ODQgODU0LjIxMiA1MzkuMDM4IDg1Ny4wODQgNTM2LjE2NSA4NTkuMzQxIDUzMy4yOTIgODYxLjU5OCA1MjkuODA0IDg2My4yNCA1MjUuNDk1IDg2NC4wNjEgNTIxLjM5MSA4NjQuODgyIDUxNy40OTMgODY0Ljg4MiA1MTQuMDA0IDg2My44NTYgNTEwLjUxNiA4NjIuODMgNTA3LjY0MyA4NjAuOTgzIDUwNS4xODEgODU4LjUyMSA1MDIuNzE5IDg1NS44NTMgNTAxLjI4MiA4NTIuNTcgNTAwLjQ2MiA4NDguNjcxTDQ5NS41MzcgODIzLjQzMyA1MDUuMTgxIDgyMS41ODYgNTEwLjMxMSA4NDYuMDA0WiIgZmlsbD0iI2ZmYzIwMCIgZmlsbC1ydWxlPSJub256ZXJvIiBmaWxsLW9wYWNpdHk9IjEiIHRyYW5zZm9ybT0ibWF0cml4KDEgMCAwIDEuMDAwODMgMjEyLjU1NSAtMjA3KSIvPjxwYXRoIGQ9Ik01OTMuNDEzIDg0Mi43MjEgNTkwLjEzIDg0My45NTIgNTgyLjUzOCA4MDUuOTkyIDU5MS45NzcgODA0LjE0NSA2MDAuOCA4NDguMDU2IDU4OC40ODkgODUwLjUxOCA1NTMuNDAxIDgxOC4wOTggNTU2LjY4NCA4MTYuODY3IDU2NC4yNzYgODU1LjIzOCA1NTQuODM3IDg1Ny4wODQgNTQ2LjAxNCA4MTMuMTczIDU1OC41MzEgODEwLjcxMSA1OTMuNDEzIDg0Mi43MjFaIiBmaWxsPSIjZmZjMjAwIiBmaWxsLXJ1bGU9Im5vbnplcm8iIGZpbGwtb3BhY2l0eT0iMSIgdHJhbnNmb3JtPSJtYXRyaXgoMSAwIDAgMS4wMDA4MyAyMTIuNTU1IC0yMDcpIi8+PHBhdGggZD0iTTYzOC45NjYgNzk0LjcwNkM2NDIuNDU0IDc5NC4wOTEgNjQ1LjMyNyA3OTQuMDkxIDY0OC4xOTkgNzk0LjcwNiA2NTAuODY3IDc5NS4zMjIgNjUzLjEyNCA3OTYuNzU4IDY1NC45NzEgNzk4LjYwNSA2NTYuODE4IDgwMC40NTEgNjU3Ljg0NCA4MDIuOTE0IDY1OC40NTkgODA1Ljc4NiA2NTkuMDc1IDgwOC42NTkgNjU4Ljg2OSA4MTEuMzI3IDY1OC4wNDkgODEzLjc4OSA2NTcuMjI4IDgxNi4yNTEgNjU1LjU4NiA4MTguMzAzIDY1My4zMjkgODE5Ljk0NSA2NTEuMDcyIDgyMS41ODYgNjQ4LjE5OSA4MjIuODE3IDY0NC45MTYgODIzLjYzOEw2MjYuMDM5IDgyNy4zMzIgNjI0LjM5NyA4MTkuMTI0IDY0Mi44NjUgODE1LjQzQzY0NS4xMjIgODE1LjAyIDY0Ni43NjMgODEzLjk5NCA2NDcuNzg5IDgxMi43NjMgNjQ4LjgxNSA4MTEuMzI3IDY0OS4yMjUgODA5LjY4NSA2NDguODE1IDgwNy44MzggNjQ4LjQwNSA4MDUuNzg2IDY0Ny4zNzkgODA0LjM1IDY0NS45NDIgODAzLjUyOSA2NDQuNTA2IDgwMi43MDkgNjQyLjY1OSA4MDIuNTAzIDY0MC40MDIgODAyLjkxNEw2MjIuNzU2IDgwNi40MDIgNjI2LjI0NCA4MDAuODYyIDYzNC4yNDYgODQxLjI4NSA2MjQuNjAyIDg0My4xMzEgNjE1Ljc3OSA3OTkuMjIgNjM4Ljk2NiA3OTQuNzA2WiIgZmlsbD0iI2ZmYzIwMCIgZmlsbC1ydWxlPSJub256ZXJvIiBmaWxsLW9wYWNpdHk9IjEiIHRyYW5zZm9ybT0ibWF0cml4KDEgMCAwIDEuMDAwODMgMjEyLjU1NSAtMjA3KSIvPjxwYXRoIGQ9Ik02ODQuMzEzIDc4NS42NzggNzEzLjI0NSA4MjUuNjkgNzAyLjc4IDgyNy43NDIgNjc3LjMzNyA3OTEuNDIzIDY4MC42MiA3OTAuODA3IDY3MC45NzYgODM0LjMwOCA2NjAuNTExIDgzNi4zNiA2NzEuNzk2IDc4OC4zNDUgNjg0LjMxMyA3ODUuNjc4Wk02NjkuOTUgODI0LjY2NCA2NjguMzA4IDgxNi42NjIgNjk4LjA2MSA4MTAuNzExIDY5OS43MDMgODE4LjcxNCA2NjkuOTUgODI0LjY2NFoiIGZpbGw9IiNmZmMyMDAiIGZpbGwtcnVsZT0ibm9uemVybyIgZmlsbC1vcGFjaXR5PSIxIiB0cmFuc2Zvcm09Im1hdHJpeCgxIDAgMCAxLjAwMDgzIDIxMi41NTUgLTIwNykiLz48cGF0aCBkPSJNNzE5LjgxMSA3OTkuMDE1IDczNi40MzIgNzk1LjczMkM3MzguNjg5IDc5NS4zMjIgNzQwLjMzIDc5NC41MDEgNzQxLjM1NiA3OTMuMDY1IDc0Mi4zODIgNzkxLjYyOCA3NDIuNzkzIDc5MC4xOTIgNzQyLjM4MiA3ODguMzQ1IDc0MS45NzIgNzg2LjQ5OCA3NDEuMTUxIDc4NS4yNjcgNzM5LjcxNSA3ODQuNDQ3IDczOC4yNzggNzgzLjYyNiA3MzYuNDMyIDc4My40MjEgNzM0LjE3NSA3ODQuMDM2TDcxNi4xMTggNzg3LjUyNCA3MTkuNjA2IDc4MS41NzQgNzI3LjgxNCA4MjIuODE3IDcxOC4xNyA4MjQuNjY0IDcwOS4zNDYgNzgwLjc1MyA3MzMuNzY0IDc3NS44MjhDNzM2Ljg0MiA3NzUuMjEzIDczOS43MTUgNzc1LjIxMyA3NDIuMzgyIDc3NS44MjggNzQ1LjA1IDc3Ni40NDQgNzQ3LjEwMiA3NzcuNjc1IDc0OC45NDggNzc5LjUyMiA3NTAuNzk1IDc4MS4zNjkgNzUxLjgyMSA3ODMuNjI2IDc1Mi40MzcgNzg2LjI5MyA3NTMuMDUyIDc4OC45NjEgNzUyLjg0NyA3OTEuNDIzIDc1MS44MjEgNzkzLjg4NSA3NTAuNzk1IDc5Ni4xNDIgNzQ5LjM1OSA3OTguMTk0IDc0Ny4zMDcgNzk5LjgzNiA3NDUuMjU1IDgwMS40NzcgNzQyLjU4NyA4MDIuNTAzIDczOS4zMDQgODAzLjExOUw3MjEuNjU4IDgwNi42MDcgNzE5LjgxMSA3OTkuMDE1Wk03MjguMDE5IDgwMS4yNzIgNzM5LjA5OSA3OTkuMDE1IDc1OS40MTMgODE2LjQ1NiA3NDcuOTIyIDgxOC43MTQgNzI4LjAxOSA4MDEuMjcyWiIgZmlsbD0iI2ZmYzIwMCIgZmlsbC1ydWxlPSJub256ZXJvIiBmaWxsLW9wYWNpdHk9IjEiIHRyYW5zZm9ybT0ibWF0cml4KDEgMCAwIDEuMDAwODMgMjEyLjU1NSAtMjA3KSIvPjxwYXRoIGQ9Ik03NjUuMzY0IDgxNS4yMjUgNzU2LjU0MSA3NzEuMzE0IDc2Ni4xODUgNzY5LjQ2OCA3NzMuMzY2IDgwNS4zNzYgNzcwLjI4OCA4MDMuOTQgNzkwLjE5MiA3NjQuNzQ4IDgwMC42NTcgNzYyLjY5NiA3NzQuMTg3IDgxMy41ODQgNzY1LjM2NCA4MTUuMjI1Wk03ODEuNTc0IDc4OS43ODEgNzg3LjMxOSA3ODEuOTg0IDgwOS44OSA4MDYuNDAyIDc5OC44MSA4MDguNjU5IDc4MS41NzQgNzg5Ljc4MVoiIGZpbGw9IiNmZmMyMDAiIGZpbGwtcnVsZT0ibm9uemVybyIgZmlsbC1vcGFjaXR5PSIxIiB0cmFuc2Zvcm09Im1hdHJpeCgxIDAgMCAxLjAwMDgzIDIxMi41NTUgLTIwNykiLz48cGF0aCBkPSJNMzg0LjUyOSA1MjIuMDA3QzM5MC4wNjkgNTI1LjI5IDM5NS42MDkgNTI2LjkzMSA0MDAuNzM5IDUyNy4xMzcgNDA2LjA3NCA1MjcuMzQyIDQxMC45OTggNTI2LjExMSA0MTUuMzA3IDUyMy4yMzggNDE5LjgyMiA1MjAuMzY1IDQyMy43MiA1MTYuMjYxIDQyNi43OTggNTEwLjcyMSA0MzAuMDgxIDUwNS4xODEgNDMxLjcyMyA0OTkuNjQxIDQzMS45MjggNDk0LjUxMSA0MzIuMTMzIDQ4OS4zODEgNDMwLjY5NyA0ODQuNDU3IDQyOC4wMjkgNDc5Ljk0MyA0MjUuMzYyIDQ3NS40MjggNDIxLjA1MyA0NzEuNzM1IDQxNS41MTIgNDY4LjQ1MiA0MDkuNzY3IDQ2NS4xNjkgNDA0LjQzMiA0NjMuMzIyIDM5OS4wOTcgNDYzLjExNyAzOTMuOTY3IDQ2Mi45MTIgMzg5LjA0MyA0NjQuMTQzIDM4NC41MjkgNDY3LjAxNiAzODAuMDE0IDQ2OS42ODMgMzc2LjMyMSA0NzMuOTkyIDM3My4wMzggNDc5LjUzMiAzNjkuNzU1IDQ4NS4wNzIgMzY4LjExMyA0OTAuNjEzIDM2Ny45MDggNDk1Ljc0MiAzNjcuNzAzIDUwMS4wNzcgMzY4LjkzNCA1MDUuNzk3IDM3MS44MDcgNTEwLjMxMSAzNzQuODg1IDUxNS4wMyAzNzguOTg4IDUxOC43MjQgMzg0LjUyOSA1MjIuMDA3WiIgZmlsbD0iI2ZmYzIwMCIgZmlsbC1ydWxlPSJub256ZXJvIiBmaWxsLW9wYWNpdHk9IjEiIHRyYW5zZm9ybT0ibWF0cml4KDEgMCAwIDEuMDAwODMgMjEyLjU1NSAtMjA3KSIvPjxwYXRoIGQ9Ik00NjEuNjgxIDM4OS4yNDhDNDY3LjIyMSAzOTIuNTMxIDQ3Mi43NjEgMzk0LjE3MyA0NzcuODkxIDM5NC4zNzggNDgzLjIyNiAzOTQuNTgzIDQ4OC4xNSAzOTMuMzUyIDQ5Mi40NTkgMzkwLjQ3OSA0OTYuOTczIDM4Ny42MDYgNTAwLjg3MiAzODMuNTAzIDUwMy45NSAzNzcuOTYyIDUwNy4yMzMgMzcyLjQyMiA1MDguODc1IDM2Ni44ODIgNTA5LjA4IDM2MS43NTIgNTA5LjI4NSAzNTYuNjIzIDUwNy44NDkgMzUxLjY5OCA1MDUuMTgxIDM0Ny4xODQgNTAyLjUxNCAzNDIuNjcgNDk4LjIwNSAzMzguOTc2IDQ5Mi42NjQgMzM1LjY5MyA0ODYuOTE5IDMzMi40MSA0ODEuNTg0IDMzMC41NjMgNDc2LjI0OSAzMzAuMzU4IDQ3MS4xMTkgMzMwLjE1MyA0NjYuMTk1IDMzMS4zODQgNDYxLjY4MSAzMzQuMjU3IDQ1Ny4xNjYgMzM2LjkyNCA0NTMuNDczIDM0MS4yMzMgNDUwLjE5IDM0Ni43NzMgNDQ2LjkwNyAzNTIuMzE0IDQ0NS4yNjUgMzU3Ljg1NCA0NDUuMDYgMzYyLjk4MyA0NDQuODU1IDM2OC4zMTggNDQ2LjA4NiAzNzMuMDM4IDQ0OC45NTkgMzc3LjU1MiA0NTIuMDM3IDM4Mi4wNjYgNDU2LjE0IDM4NS45NjUgNDYxLjY4MSAzODkuMjQ4WiIgZmlsbD0iI2ZmYzIwMCIgZmlsbC1ydWxlPSJub256ZXJvIiBmaWxsLW9wYWNpdHk9IjEiIHRyYW5zZm9ybT0ibWF0cml4KDEgMCAwIDEuMDAwODMgMjEyLjU1NSAtMjA3KSIvPjxwYXRoIGQ9Ik0zMDcuMTcxIDY0OC44MTUgMjgwLjI5MSA2MzMuMjIxIDI4OS43MyA2MTcuMjE2IDI4My4xNjQgNjEzLjMxN0MyNzMuMzE1IDYwNy41NzIgMjY1LjkyOCA2MDAuOCAyNjEuMjA5IDU5My4wMDMgMjU2LjQ4OSA1ODUuMjA2IDI1NC40MzcgNTc2LjM4MyAyNTUuMDUzIDU2Ni45NDQgMjU1LjY2OCA1NTcuNTA1IDI1OS4zNjIgNTQ3LjI0NSAyNjUuNzIzIDUzNi4xNjUgMjY4LjU5NSA1MzEuMjQgMjcxLjQ2OCA1MjcuMTM3IDI3NC4zNDEgNTIzLjY0OCAyNzcuMjE0IDUyMC4xNiAyODAuNzAyIDUxNi42NzIgMjg0LjYgNTEzLjE4NEwzMTEuNDggNTI4Ljc3OEMzMDguMTk3IDUzMS40NDYgMzA1LjMyNSA1MzQuMzE4IDMwMi42NTcgNTM3LjM5NiAyOTkuOTkgNTQwLjQ3NCAyOTcuNTI3IDU0My45NjIgMjk1LjQ3NiA1NDcuODYxIDI5MS4xNjcgNTU1LjQ1MyAyODkuNTI1IDU2MS40MDQgMjkwLjU1MSA1NjUuOTE4IDI5MS41NzcgNTcwLjQzMiAyOTUuMjcgNTc0LjUzNiAzMDEuNDI2IDU3OC4yMjlMMzEwLjA0NCA1ODMuMzU5IDMyNy42OTEgNTUzLjQwMSAzNTQuNTcxIDU2OC45OTYgMzM2LjkyNCA1OTkuMTU5IDM5Ny42NjEgNjM0Ljg2MiA4MDMuOTQgMTAyLjU5NiA0MTMuMDUgMCAxOTguMDEgNjI4LjI5NiAzNDIuMjU5IDcwNi40NzQgMzcyLjgzMyA2NjYuNDYxIDMxNi4yIDYzMy4yMjEgMzA3LjE3MSA2NDguODE1Wk00NTQuOTA5IDIwMi4xMTMgNTkyLjM4NyAyODEuOTMzIDU3Mi40ODQgMzE2LjQwNSA0MzUuMDA2IDIzNi41ODYgNDU0LjkwOSAyMDIuMTEzWk00MTEuNDA5IDM2Ny4yOTNDNDEyLjIyOSAzNTUuNTk3IDQxNi4xMjggMzQzLjQ5IDQyMy4zMSAzMzEuMTc5IDQzMC4yODYgMzE5LjA3MyA0MzguOTA0IDMwOS42MzQgNDQ4Ljc1MyAzMDMuMDY4IDQ1OC42MDMgMjk2LjUwMSA0NjkuMDY3IDI5My4wMTMgNDgwLjE0OCAyOTIuNjAzIDQ5MS4yMjggMjkyLjE5MiA1MDIuMTAzIDI5NS4wNjUgNTEyLjc3MyAzMDEuMjIxIDUyMy40NDMgMzA3LjM3NyA1MzEuNDQ2IDMxNS41ODQgNTM2LjU3NSAzMjUuNDM0IDU0MS43MDUgMzM1LjI4MyA1NDMuOTYyIDM0Ni4xNTggNTQyLjkzNiAzNTguMDU5IDU0Mi4xMTYgMzY5Ljk2IDUzOC4wMTIgMzgxLjg2MSA1MzEuMDM1IDM5My45NjcgNTIzLjg1NCA0MDYuMjc5IDUxNS40NDEgNDE1LjcxOCA1MDUuNTkxIDQyMi4yODQgNDk1Ljc0MiA0MjguODUgNDg1LjI3OCA0MzIuMzM4IDQ3NC4xOTcgNDMyLjc0OSA0NjMuMTE3IDQzMy4xNTkgNDUyLjI0MiA0MzAuMjg2IDQ0MS41NzIgNDI0LjEzMSA0MzAuNjk3IDQxNy43NyA0MjIuNjk0IDQwOS43NjcgNDE3LjU2NCAzOTkuOTE4IDQxMi44NDUgMzg5Ljg2NCA0MTAuNzkzIDM3OC45ODggNDExLjQwOSAzNjcuMjkzWk0zMzQuNDYyIDUwMC4wNTFDMzM1LjI4MyA0ODguMzU1IDMzOS4xODEgNDc2LjI0OSAzNDYuMzYzIDQ2My45MzggMzUzLjM0IDQ1MS44MzEgMzYxLjk1OCA0NDIuMzkzIDM3MS44MDcgNDM1LjgyNiAzODEuNjU2IDQyOS4yNiAzOTIuMTIxIDQyNS43NzIgNDAzLjIwMSA0MjUuMzYyIDQxNC4yODEgNDI0Ljk1MSA0MjUuMTU2IDQyNy44MjQgNDM1LjgyNiA0MzMuOTggNDQ2LjQ5NiA0NDAuMTM1IDQ1NC40OTkgNDQ4LjM0MyA0NTkuNjI5IDQ1OC4xOTIgNDY0Ljc1OCA0NjguMDQxIDQ2Ny4wMTYgNDc4LjkxNyA0NjUuOTkgNDkwLjgxOCA0NjUuMTY5IDUwMi43MTkgNDYxLjA2NSA1MTQuNjIgNDU0LjA4OCA1MjYuNzI2IDQ0Ni45MDcgNTM5LjAzOCA0MzguNDk0IDU0OC40NzYgNDI4LjY0NSA1NTUuMDQzIDQxOC43OTYgNTYxLjYwOSA0MDguMzMxIDU2NS4wOTcgMzk3LjI1IDU2NS41MDcgMzg2LjE3IDU2NS45MTggMzc1LjI5NSA1NjMuMDQ1IDM2NC42MjUgNTU2Ljg4OSAzNTMuNzUgNTUwLjUyOCAzNDUuNzQ3IDU0Mi41MjYgMzQwLjYxOCA1MzIuNjc3IDMzNS42OTMgNTIyLjYyMiAzMzMuNjQxIDUxMS43NDcgMzM0LjQ2MiA1MDAuMDUxWiIgZmlsbD0iI2ZmYzIwMCIgZmlsbC1ydWxlPSJub256ZXJvIiBmaWxsLW9wYWNpdHk9IjEiIHRyYW5zZm9ybT0ibWF0cml4KDEgMCAwIDEuMDAwODMgMjEyLjU1NSAtMjA3KSIvPjxwYXRoIGQ9Ik0xOTAuODI4IDgzNS45NUMxODQuODc3IDgzNC41MTMgMTc4LjkyNyA4MzQuMTAzIDE3My4xODIgODM0LjkyNCAxNjcuNDM2IDgzNS43NDQgMTYyLjEwMSA4MzcuMzg2IDE1Ny41ODcgODQwLjI1OSAxNTIuODY4IDg0Mi45MjYgMTQ5LjE3NCA4NDYuODI1IDE0Ni4zMDEgODUxLjMzOSAxNDMuNjM0IDg1NS44NTMgMTQyLjQwMyA4NjAuMzY3IDE0Mi42MDggODY1LjA4NyAxNDIuODEzIDg2OS44MDYgMTQ0LjI1IDg3NC4zMiAxNDYuOTE3IDg3OC42MjkgMTQ5LjU4NSA4ODIuOTM4IDE1My40ODMgODg2LjYzMiAxNTguNjEzIDg4OS43MSAxNjMuNTM4IDg5Mi41ODIgMTY4LjY2NyA4OTQuNDI5IDE3My41OTIgODk0LjgzOSAxNzguNzIyIDg5NS4yNSAxODMuMjM2IDg5NC40MjkgMTg3LjU0NSA4OTIuMTcyIDE5MS44NTQgODkwLjEyIDE5NS4zNDIgODg2LjgzNyAxOTcuODA0IDg4Mi4zMjMgMjAwLjY3NyA4NzcuNjAzIDIwMi4xMTMgODcyLjY3OSAyMDIuMzE5IDg2Ny4xMzkgMjAyLjUyNCA4NjEuODA0IDIwMS43MDMgODU2LjI2MyAxOTkuNjUxIDg1MC45MjkgMTk3LjgwNCA4NDUuMzg4IDE5NC43MjcgODQwLjQ2NCAxOTAuODI4IDgzNS45NVoiIGZpbGw9IiNmZmMyMDAiIGZpbGwtcnVsZT0ibm9uemVybyIgZmlsbC1vcGFjaXR5PSIxIiB0cmFuc2Zvcm09Im1hdHJpeCgxIDAgMCAxLjAwMDgzIDIxMi41NTUgLTIwNykiLz48cGF0aCBkPSJNMzM5LjE4MSA4NTcuNDk1QzMzOC4xNTUgODMwLjgyIDMyOS41MzcgODA1LjE3MSAzMTMuNTMyIDc4MS4zNjkgMjk3LjczMyA3NTcuNTY2IDI3NC43NTEgNzM3LjA0NyAyNDUuNjE0IDcyMC4wMTYgMjE2LjA2NiA3MDIuOTg2IDE4Ni43MjQgNjkzLjM0MiAxNTguNDA4IDY5MS4yOSAxMjkuODg2IDY4OS40NDMgMTAzLjQxNiA2OTQuNTczIDc5LjYxNDIgNzA2Ljg4NCA1NS44MTIgNzE5LjE5NiAzNi4xMTM3IDczOC42ODkgMjAuOTI5NSA3NjQuNzQ4IDYuMTU1NzQgNzkwLjE5Mi0xLjAyNTk2IDgxNi44NjcgMCA4NDMuNzQ3IDEuMDI1OTYgODcwLjYyNyA5LjQzODggODk2LjI3NiAyNS40NDM3IDkxOS44NzMgNDEuMjQzNSA5NDMuMjY1IDY0LjIyNDkgOTYzLjk4OSA5My43NzI0IDk4MS4wMiAxMjIuOTEgOTk3Ljg0NiAxNTIuMjUyIDEwMDcuNjkgMTgwLjU2OCAxMDA5Ljc1IDE4NC42NzIgMTAxMC4xNiAxODguNzc2IDEwMTAuMTYgMTkyLjg4IDEwMTAuMTYgMjE2LjY4MiAxMDEwLjE2IDIzOS4wNDggMTAwNC44MiAyNTkuNTY3IDk5NC4xNTIgMjgzLjM2OSA5ODEuNjM1IDMwMy4yNzMgOTYyLjM0NyAzMTguMjUyIDkzNi40OTMgMzMzLjAyNiA5MTEuMDUgMzQwLjIwNyA4ODQuMzc1IDMzOS4xODEgODU3LjQ5NVpNMjQyLjc0MSA4NjMuODU2IDIxOS43NiA4NTMuNTk2QzIyNC42ODUgODYyLjYyNCAyMjcuMTQ3IDg3MS44NTggMjI3LjM1MiA4ODEuMDkyIDIyNy41NTcgODkwLjczNiAyMjQuODkgOTAwLjE3NCAyMTkuNTU1IDkwOS4yMDMgMjE0LjAxNSA5MTguNDM3IDIwNi44MzMgOTI1LjQxMyAxOTguMjE1IDkyOS43MjIgMTg5LjU5NyA5MzQuMDMxIDE3OS45NTMgOTM1Ljg3OCAxNjkuNDg4IDkzNS4wNTcgMTU5LjAyMyA5MzQuMjM2IDE0OC41NTkgOTMwLjU0MyAxMzguMDk0IDkyNC4zODcgMTI3LjQyNCA5MTguMDI2IDExOS4yMTYgOTEwLjIyOSAxMTMuNDcxIDkwMS42MTEgMTA3LjkzMSA4OTIuNzg4IDEwNC44NTMgODgzLjU1NCAxMDQuNjQ4IDg3My45MSAxMDQuNDQyIDg2NC4yNjYgMTA3LjExIDg1NC42MjIgMTEyLjY1IDg0NS4zODggMTE3Ljk4NSA4MzYuMzYgMTI0Ljk2MiA4MjkuNzk0IDEzMy43ODUgODI1LjI4IDE0MS45OTIgODIxLjE3NiAxNTEuMDIxIDgxOS4xMjQgMTYxLjA3NSA4MTguOTE5TDEwOC43NTEgNzc4LjkwNiAxMjkuODg2IDc0My42MTMgMjA3LjAzOCA4MDMuMTE5IDI2My44NzYgODI5LjE3OCAyNDIuNzQxIDg2My44NTZaIiBmaWxsPSIjZmZjMjAwIiBmaWxsLXJ1bGU9Im5vbnplcm8iIGZpbGwtb3BhY2l0eT0iMSIgdHJhbnNmb3JtPSJtYXRyaXgoMSAwIDAgMS4wMDA4MyAyMTIuNTU1IC0yMDcpIi8+PC9nPjwvZz48L2c+PC9nPjwvZz48L3N2Zz4=",
+      original: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODEyIiBoZWlnaHQ9IjEwMTIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHhtbDpzcGFjZT0icHJlc2VydmUiIG92ZXJmbG93PSJoaWRkZW4iPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKC0yMTIgMjA4KSI+PGc+PGc+PGc+PGc+PHBhdGggZD0iTTM3OC45ODggODA3LjYzMyAzODguODM4IDgwNS41ODFDMzg5LjQ1MyA4MDcuMDE4IDM5MC4yNzQgODA4LjI0OSAzOTEuNTA1IDgwOS4wNjkgMzkyLjczNiA4MDkuODkgMzk0LjM3OCA4MTAuNTA2IDM5Ni4yMjUgODEwLjcxMSAzOTguMDcxIDgxMC45MTYgNDAwLjMyOCA4MTAuOTE2IDQwMi41ODUgODEwLjMwMSA0MDYuMDc0IDgwOS42ODUgNDA4LjUzNiA4MDguNjU5IDQxMC4zODMgODA3LjIyMyA0MTIuMjI5IDgwNS43ODYgNDEyLjg0NSA4MDQuMTQ1IDQxMi40MzUgODAyLjUwMyA0MTIuMjI5IDgwMS4wNjcgNDExLjQwOSA4MDAuMDQxIDQxMC4xNzcgNzk5LjYzMSA0MDguOTQ2IDc5OS4wMTUgNDA2LjY4OSA3OTkuMDE1IDQwMy42MTEgNzk5LjIyTDM5NC43ODggODAwLjA0MUMzODkuMDQzIDgwMC40NTEgMzg0LjczNCA4MDAuMDQxIDM4MS44NjEgNzk4LjQgMzc4Ljk4OCA3OTYuNzU4IDM3Ny4xNDIgNzk0LjI5NiAzNzYuMzIxIDc5MC42MDIgMzc1LjcwNSA3ODcuNzMgMzc2LjExNiA3ODUuMDYyIDM3Ny4zNDcgNzgyLjgwNSAzNzguNTc4IDc4MC4zNDMgMzgwLjYzIDc3OC40OTYgMzgzLjUwMyA3NzYuNjQ5IDM4Ni4zNzUgNzc0LjgwMyAzODkuNjU4IDc3My43NzcgMzkzLjc2MiA3NzIuOTU2IDM5Ny42NjEgNzcyLjEzNSA0MDEuMzU0IDc3Mi4xMzUgNDA0LjYzNyA3NzIuNTQ1IDQwNy45MiA3NzMuMTYxIDQxMC43OTMgNzc0LjM5MiA0MTMuMDUgNzc2LjAzNCA0MTUuMzA3IDc3Ny44OCA0MTYuNzQ0IDc4MC4xMzggNDE3LjU2NCA3ODMuMDFMNDA3LjcxNSA3ODUuMDYyQzQwNy4zMDUgNzgzLjgzMSA0MDYuNDg0IDc4Mi44MDUgNDA1LjI1MyA3ODEuOTg0IDQwNC4yMjcgNzgxLjE2NCA0MDIuNzkxIDc4MC43NTMgNDAwLjk0NCA3ODAuNTQ4IDM5OS4wOTcgNzgwLjM0MyAzOTcuMjUgNzgwLjU0OCAzOTQuOTkzIDc4MC45NTggMzkxLjkxNSA3ODEuNTc0IDM4OS40NTMgNzgyLjYgMzg3LjgxMiA3ODMuODMxIDM4Ni4xNyA3ODUuMDYyIDM4NS41NTUgNzg2LjcwNCAzODUuNzYgNzg4LjM0NSAzODUuOTY1IDc4OS41NzYgMzg2Ljc4NiA3OTAuNjAyIDM4OC4wMTcgNzkxLjAxMyAzODkuMjQ4IDc5MS40MjMgMzkxLjMgNzkxLjYyOCAzOTQuMTczIDc5MS40MjNMNDAzLjQwNiA3OTAuODA3QzQwNy41MSA3OTAuMzk3IDQxMC43OTMgNzkwLjYwMiA0MTMuMjU1IDc5MS4wMTMgNDE1LjcxOCA3OTEuNDIzIDQxNy43NyA3OTIuNDQ5IDQxOS4wMDEgNzkzLjg4NSA0MjAuMjMyIDc5NS4zMjIgNDIxLjI1OCA3OTcuMTY4IDQyMS42NjggNzk5LjYzMSA0MjIuMjg0IDgwMi41MDMgNDIxLjg3MyA4MDUuMzc2IDQyMC42NDIgODA3LjgzOCA0MTkuNDExIDgxMC4zMDEgNDE3LjE1NCA4MTIuNTU4IDQxNC4yODEgODE0LjQwNCA0MTEuNDA5IDgxNi4yNTEgNDA3LjkyIDgxNy40ODIgNDAzLjYxMSA4MTguNTA4IDM5OS4zMDIgODE5LjMyOSAzOTUuNDA0IDgxOS41MzQgMzkxLjkxNSA4MTguOTE5IDM4OC40MjcgODE4LjMwMyAzODUuNTU1IDgxNy4wNzIgMzgzLjA5MiA4MTUuMDIgMzgxLjI0NiA4MTMuMTczIDM3OS44MDkgODEwLjcxMSAzNzguOTg4IDgwNy42MzNaIiBmaWxsPSIjODlEN0NFIiBmaWxsLXJ1bGU9Im5vbnplcm8iIGZpbGwtb3BhY2l0eT0iMSIgdHJhbnNmb3JtPSJtYXRyaXgoMSAwIDAgMS4wMDA4MyAyMTIuNTU1IC0yMDcpIi8+PHBhdGggZD0iTTQ0NS44ODEgNzYzLjUxN0M0NDkuMzY5IDc2Mi45MDEgNDUyLjI0MiA3NjIuOTAxIDQ1NS4xMTQgNzYzLjUxNyA0NTcuNzgyIDc2NC4xMzMgNDYwLjAzOSA3NjUuNTY5IDQ2MS44ODYgNzY3LjQxNiA0NjMuNzMyIDc2OS4yNjIgNDY0Ljc1OCA3NzEuNzI1IDQ2NS4zNzQgNzc0LjU5NyA0NjUuOTkgNzc3LjQ3IDQ2NS43ODQgNzgwLjEzOCA0NjQuOTY0IDc4Mi42IDQ2NC4xNDMgNzg1LjA2MiA0NjIuNTAxIDc4Ny4xMTQgNDYwLjI0NCA3ODguNzU2IDQ1Ny45ODcgNzkwLjM5NyA0NTUuMTE0IDc5MS42MjggNDUxLjgzMSA3OTIuNDQ5TDQzMi45NTQgNzk2LjE0MiA0MzEuMzEyIDc4Ny45MzUgNDQ5Ljc3OSA3ODQuMjQxQzQ1Mi4wMzcgNzgzLjgzMSA0NTMuNjc4IDc4Mi44MDUgNDU0LjcwNCA3ODEuNTc0IDQ1NS43MyA3ODAuMTM4IDQ1Ni4xNCA3NzguNDk2IDQ1NS43MyA3NzYuNjQ5IDQ1NS4zMiA3NzQuNTk3IDQ1NC4yOTQgNzczLjE2MSA0NTIuODU3IDc3Mi4zNCA0NTEuNDIxIDc3MS41MTkgNDQ5LjU3NCA3NzEuMzE0IDQ0Ny4zMTcgNzcxLjcyNUw0MjkuNjcxIDc3NS4yMTMgNDMzLjE1OSA3NjkuNjczIDQ0MS4xNjEgODEwLjA5NSA0MzEuNTE3IDgxMS45NDIgNDIyLjY5NCA3NjguMDMxIDQ0NS44ODEgNzYzLjUxN1oiIGZpbGw9IiM4OUQ3Q0UiIGZpbGwtcnVsZT0ibm9uemVybyIgZmlsbC1vcGFjaXR5PSIxIiB0cmFuc2Zvcm09Im1hdHJpeCgxIDAgMCAxLjAwMDgzIDIxMi41NTUgLTIwNykiLz48cGF0aCBkPSJNNTAwLjA1MSA3OTkuNDI2QzQ5NS4xMjcgODAwLjQ1MSA0OTAuNDA3IDgwMC4yNDYgNDg2LjMwMyA3OTkuMjIgNDgyLjIgNzk3Ljk4OSA0NzguNzExIDc5NS45MzcgNDc1LjgzOSA3OTMuMDY1IDQ3Mi45NjYgNzg5Ljk4NyA0NzEuMTE5IDc4Ni4yOTMgNDcwLjI5OSA3ODEuNzc5IDQ2OS40NzggNzc3LjI2NSA0NjkuNjgzIDc3Mi45NTYgNDcxLjExOSA3NjkuMjYyIDQ3Mi41NTYgNzY1LjM2NCA0NzUuMDE4IDc2Mi4wODEgNDc4LjMwMSA3NTkuNDEzIDQ4MS41ODQgNzU2Ljc0NiA0ODUuODkzIDc1NC44OTkgNDkwLjgxOCA3NTMuODczIDQ5NS43NDIgNzUyLjg0NyA1MDAuNDYyIDc1My4wNTIgNTA0LjU2NiA3NTQuMDc4IDUwOC42NjkgNzU1LjMwOSA1MTIuMTU4IDc1Ny4zNjEgNTE1LjAzIDc2MC4yMzQgNTE3LjkwMyA3NjMuMzEyIDUxOS43NSA3NjcuMDA1IDUyMC41NyA3NzEuNTE5IDUyMS4zOTEgNzc2LjAzNCA1MjEuMTg2IDc4MC4zNDMgNTE5Ljc1IDc4NC4wMzYgNTE4LjMxMyA3ODcuOTM1IDUxNS44NTEgNzkxLjIxOCA1MTIuNTY4IDc5My44ODUgNTA5LjI4NSA3OTYuNTUzIDUwNC45NzYgNzk4LjQgNTAwLjA1MSA3OTkuNDI2Wk00OTguMjA1IDc5MC42MDJDNTAxLjI4MiA3ODkuOTg3IDUwMy45NSA3ODguOTYxIDUwNi4wMDIgNzg3LjMxOSA1MDguMDU0IDc4NS42NzggNTA5LjQ5IDc4My44MzEgNTEwLjMxMSA3ODEuMzY5IDUxMS4xMzIgNzc5LjExMiA1MTEuMzM3IDc3Ni40NDQgNTEwLjcyMSA3NzMuNTcxIDUxMC4xMDYgNzcwLjY5OSA1MDkuMDggNzY4LjQ0MiA1MDcuNDM4IDc2Ni41OTUgNTA1Ljc5NyA3NjQuNzQ4IDUwMy43NDUgNzYzLjUxNyA1MDEuMjgyIDc2Mi42OTYgNDk4LjgyIDc2Mi4wODEgNDk1Ljk0NyA3NjIuMDgxIDQ5Mi44NyA3NjIuNjk2IDQ4OS43OTIgNzYzLjMxMiA0ODcuMTI0IDc2NC4zMzggNDg1LjA3MiA3NjUuOTc5IDQ4My4wMiA3NjcuNjIxIDQ4MS41ODQgNzY5LjQ2OCA0ODAuNzYzIDc3MS45MyA0NzkuOTQzIDc3NC4zOTIgNDc5LjczNyA3NzYuODU0IDQ4MC4zNTMgNzc5LjcyNyA0ODAuOTY5IDc4Mi42IDQ4MS45OTQgNzg0Ljg1NyA0ODMuNjM2IDc4Ni43MDQgNDg1LjI3OCA3ODguNTUgNDg3LjMyOSA3ODkuNzgxIDQ4OS45OTcgNzkwLjYwMiA0OTIuNDU5IDc5MS4yMTggNDk1LjEyNyA3OTEuMjE4IDQ5OC4yMDUgNzkwLjYwMloiIGZpbGw9IiM4OUQ3Q0UiIGZpbGwtcnVsZT0ibm9uemVybyIgZmlsbC1vcGFjaXR5PSIxIiB0cmFuc2Zvcm09Im1hdHJpeCgxIDAgMCAxLjAwMDgzIDIxMi41NTUgLTIwNykiLz48cGF0aCBkPSJNNTMzLjQ5NyA3NjYuMzkgNTUwLjExOCA3NjMuMTA3QzU1Mi4zNzUgNzYyLjY5NiA1NTQuMDE3IDc2MS44NzUgNTU1LjA0MyA3NjAuNDM5IDU1Ni4wNjkgNzU5LjAwMyA1NTYuNDc5IDc1Ny41NjYgNTU2LjA2OSA3NTUuNzIgNTU1LjY1OCA3NTMuODczIDU1NC44MzcgNzUyLjY0MiA1NTMuMTk2IDc1MS44MjEgNTUxLjc2IDc1MSA1NDkuOTEzIDc1MC43OTUgNTQ3LjY1NiA3NTEuNDExTDUyOS41OTkgNzU0Ljg5OSA1MzMuMDg3IDc0OC45NDggNTQxLjI5NSA3OTAuMTkyIDUzMS42NTEgNzkyLjAzOSA1MjIuODI4IDc0OC4xMjggNTQ3LjI0NSA3NDMuMjAzQzU1MC4zMjMgNzQyLjU4NyA1NTMuMTk2IDc0Mi41ODcgNTU1Ljg2MyA3NDMuMjAzIDU1OC41MzEgNzQzLjgxOSA1NjAuNTgzIDc0NS4wNSA1NjIuNDMgNzQ2Ljg5NiA1NjQuMDcxIDc0OC43NDMgNTY1LjMwMiA3NTEgNTY1LjkxOCA3NTMuNjY4IDU2Ni41MzMgNzU2LjMzNSA1NjYuMzI4IDc1OC43OTggNTY1LjMwMiA3NjEuMjYgNTY0LjI3NiA3NjMuNTE3IDU2Mi44NCA3NjUuNTY5IDU2MC43ODggNzY3LjIxIDU1OC43MzYgNzY4Ljg1MiA1NTYuMDY5IDc2OS44NzggNTUyLjc4NSA3NzAuNDk0TDUzNS4xMzkgNzczLjk4MiA1MzMuNDk3IDc2Ni4zOVpNNTQxLjcwNSA3NjguODUyIDU1Mi43ODUgNzY2LjU5NSA1NzMuMDk5IDc4NC4wMzYgNTYxLjYwOSA3ODYuMjkzIDU0MS43MDUgNzY4Ljg1MloiIGZpbGw9IiM4OUQ3Q0UiIGZpbGwtcnVsZT0ibm9uemVybyIgZmlsbC1vcGFjaXR5PSIxIiB0cmFuc2Zvcm09Im1hdHJpeCgxIDAgMCAxLjAwMDgzIDIxMi41NTUgLTIwNykiLz48cGF0aCBkPSJNNTY1LjcxMyA3MzkuNzE1IDYwOS42MjQgNzMwLjg5MiA2MTEuNDcgNzM5LjcxNSA1NjcuNTU5IDc0OC41MzggNTY1LjcxMyA3MzkuNzE1Wk01ODMuNzY5IDc0MC43NDEgNTkzLjQxMyA3MzguODk0IDYwMS4yMTEgNzc4LjQ5NiA1OTEuNTY3IDc4MC4zNDMgNTgzLjc2OSA3NDAuNzQxWiIgZmlsbD0iIzg5RDdDRSIgZmlsbC1ydWxlPSJub256ZXJvIiBmaWxsLW9wYWNpdHk9IjEiIHRyYW5zZm9ybT0ibWF0cml4KDEgMCAwIDEuMDAwODMgMjEyLjU1NSAtMjA3KSIvPjxwYXRoIGQ9Ik00MjguMjM0IDg1Ny43IDQzOC4yODkgODU1LjY0OCA0MjguODUgODczLjI5NEM0MjcuNDE0IDg3NS43NTcgNDI1Ljk3NyA4NzguMDE0IDQyNC4zMzYgODc5Ljg2IDQyMi42OTQgODgxLjcwNyA0MjAuODQ3IDg4My4xNDQgNDE5LjAwMSA4ODQuMTY5IDQxNi45NDkgODg1LjE5NSA0MTQuNDg3IDg4Ni4wMTYgNDExLjgxOSA4ODYuNjMyIDQwOC4zMzEgODg3LjI0NyA0MDUuMjUzIDg4Ny4yNDcgNDAyLjU4NSA4ODYuNjMyIDM5OS45MTggODg2LjAxNiAzOTcuNjYxIDg4NC43ODUgMzk2LjAxOSA4ODMuMTQ0IDM5NC4zNzggODgxLjUwMiAzOTMuMTQ3IDg3OS40NSAzOTIuNzM2IDg3Ni45ODggMzkyLjMyNiA4NzQuNzMxIDM5Mi41MzEgODcyLjY3OSAzOTMuMTQ3IDg3MC42MjcgMzkzLjk2NyA4NjguNTc1IDM5NS40MDQgODY2LjcyOCAzOTcuNDU2IDg2NS4wODcgMzk5LjUwOCA4NjMuNDQ1IDQwMi4zOCA4NjIuMDA5IDQwNi4wNzQgODYwLjc3OEw0MDguOTQ2IDg2NC4yNjZDNDA2LjI3OSA4NjUuNDk3IDQwNC40MzIgODY2LjkzMyA0MDMuMjAxIDg2OC41NzUgNDAxLjk3IDg3MC4yMTcgNDAxLjU1OSA4NzIuMDYzIDQwMS45NyA4NzMuOTEgNDAyLjE3NSA4NzUuMTQxIDQwMi43OTEgODc2LjE2NyA0MDMuNjExIDg3Ni45ODggNDA0LjQzMiA4NzcuODA5IDQwNS42NjMgODc4LjQyNCA0MDYuODk0IDg3OC44MzUgNDA4LjMzMSA4NzkuMjQ1IDQwOS43NjcgODc5LjI0NSA0MTEuNDA5IDg3OC44MzUgNDE0LjI4MSA4NzguMjE5IDQxNi41MzggODc3LjE5MyA0MTguMTggODc1Ljc1NyA0MTkuODIyIDg3NC4zMiA0MjEuMjU4IDg3Mi4yNjggNDIyLjI4NCA4NzAuMjE3TDQyOC4yMzQgODU3LjdaTTQyOC4wMjkgODQ5LjI4NyA0MTguNTkgODUxLjEzNEM0MTcuOTc1IDg0OS4yODcgNDE2Ljk0OSA4NDguMDU2IDQxNS41MTIgODQ3LjIzNSA0MTQuMDc2IDg0Ni40MTQgNDEyLjAyNCA4NDYuMjA5IDQwOS43NjcgODQ2LjYyIDQwOC4zMzEgODQ2LjgyNSA0MDcuMzA1IDg0Ny4yMzUgNDA2LjI3OSA4NDcuODUxIDQwNS40NTggODQ4LjQ2NiA0MDQuNjM3IDg0OS4wODIgNDA0LjIyNyA4NDkuOTAzIDQwMy44MTcgODUwLjcyMyA0MDMuNjExIDg1MS41NDQgNDAzLjgxNyA4NTIuNTcgNDA0LjAyMiA4NTMuMTg2IDQwNC40MzIgODU0LjAwNiA0MDUuMDQ4IDg1NC42MjIgNDA1LjY2MyA4NTUuNDQzIDQwNi42ODkgODU2LjA1OCA0MDcuOTIgODU2Ljg3OUw0NDUuNjc2IDg3OC42MjkgNDMzLjU2OSA4ODEuMDkyIDQwMS4zNTQgODYyLjgzQzM5OS4zMDIgODYxLjU5OCAzOTcuNDU2IDg2MC4zNjcgMzk2LjIyNSA4NTguOTMxIDM5NC43ODggODU3LjQ5NSAzOTMuOTY3IDg1NS44NTMgMzkzLjU1NyA4NTQuMjEyIDM5My4xNDcgODUxLjk1NSAzOTMuMzUyIDg0OS45MDMgMzk0LjM3OCA4NDguMDU2IDM5NS40MDQgODQ2LjIwOSAzOTcuMDQ1IDg0NC4zNjIgMzk5LjMwMiA4NDMuMTMxIDQwMS41NTkgODQxLjY5NSA0MDQuNDMyIDg0MC42NjkgNDA3LjkyIDg0MC4wNTMgNDExLjYxNCA4MzkuMjMzIDQxNC42OTIgODM5LjIzMyA0MTcuNTY0IDgzOS44NDggNDIwLjQzNyA4NDAuNDY0IDQyMi42OTQgODQxLjY5NSA0MjQuMzM2IDg0My4zMzYgNDI2LjE4MiA4NDQuNzczIDQyNy40MTQgODQ2LjgyNSA0MjguMDI5IDg0OS4yODdaIiBmaWxsPSIjODlEN0NFIiBmaWxsLXJ1bGU9Im5vbnplcm8iIGZpbGwtb3BhY2l0eT0iMSIgdHJhbnNmb3JtPSJtYXRyaXgoMSAwIDAgMS4wMDA4MyAyMTIuNTU1IC0yMDcpIi8+PHBhdGggZD0iTTQ4OS43OTIgODI0LjQ1OSA0OTEuNDMzIDgzMy4wNzcgNDU5LjQyMyA4MzkuNDM4IDQ2My4zMjIgODMzLjI4MiA0NzEuMzI1IDg3My43MDUgNDYxLjY4MSA4NzUuNTUyIDQ1Mi44NTcgODMxLjY0MSA0ODkuNzkyIDgyNC40NTlaTTQ2MS40NzUgODQ5LjQ5MiA0OTIuNDU5IDg0My4zMzYgNDk0LjEwMSA4NTEuNzQ5IDQ2My4xMTcgODU3LjkwNSA0NjEuNDc1IDg0OS40OTJaIiBmaWxsPSIjODlEN0NFIiBmaWxsLXJ1bGU9Im5vbnplcm8iIGZpbGwtb3BhY2l0eT0iMSIgdHJhbnNmb3JtPSJtYXRyaXgoMSAwIDAgMS4wMDA4MyAyMTIuNTU1IC0yMDcpIi8+PHBhdGggZD0iTTUxMC4zMTEgODQ2LjAwNEM1MTAuNzIxIDg0OC4yNjEgNTExLjU0MiA4NTAuMzEzIDUxMi43NzMgODUxLjc0OSA1MTQuMDA0IDg1My4xODYgNTE1LjQ0MSA4NTQuMjEyIDUxNy40OTMgODU0LjgyNyA1MTkuNTQ0IDg1NS40NDMgNTIxLjU5NiA4NTUuNDQzIDUyMy44NTQgODU1LjAzMiA1MjYuMzE2IDg1NC42MjIgNTI4LjM2OCA4NTMuNTk2IDUyOS44MDQgODUyLjM2NSA1MzEuMjQgODUxLjEzNCA1MzIuMjY2IDg0OS40OTIgNTMyLjg4MiA4NDcuNjQ2IDUzMy40OTcgODQ1Ljc5OSA1MzMuNDk3IDg0My43NDcgNTMzLjA4NyA4NDEuMjg1TDUyOC4xNjMgODE2LjY2MiA1MzcuODA3IDgxNC44MTUgNTQyLjczMSA4NDAuMDUzQzU0My41NTIgODQzLjk1MiA1NDMuMzQ3IDg0Ny42NDYgNTQyLjExNiA4NTAuOTI5IDU0MC44ODQgODU0LjIxMiA1MzkuMDM4IDg1Ny4wODQgNTM2LjE2NSA4NTkuMzQxIDUzMy4yOTIgODYxLjU5OCA1MjkuODA0IDg2My4yNCA1MjUuNDk1IDg2NC4wNjEgNTIxLjM5MSA4NjQuODgyIDUxNy40OTMgODY0Ljg4MiA1MTQuMDA0IDg2My44NTYgNTEwLjUxNiA4NjIuODMgNTA3LjY0MyA4NjAuOTgzIDUwNS4xODEgODU4LjUyMSA1MDIuNzE5IDg1NS44NTMgNTAxLjI4MiA4NTIuNTcgNTAwLjQ2MiA4NDguNjcxTDQ5NS41MzcgODIzLjQzMyA1MDUuMTgxIDgyMS41ODYgNTEwLjMxMSA4NDYuMDA0WiIgZmlsbD0iIzg5RDdDRSIgZmlsbC1ydWxlPSJub256ZXJvIiBmaWxsLW9wYWNpdHk9IjEiIHRyYW5zZm9ybT0ibWF0cml4KDEgMCAwIDEuMDAwODMgMjEyLjU1NSAtMjA3KSIvPjxwYXRoIGQ9Ik01OTMuNDEzIDg0Mi43MjEgNTkwLjEzIDg0My45NTIgNTgyLjUzOCA4MDUuOTkyIDU5MS45NzcgODA0LjE0NSA2MDAuOCA4NDguMDU2IDU4OC40ODkgODUwLjUxOCA1NTMuNDAxIDgxOC4wOTggNTU2LjY4NCA4MTYuODY3IDU2NC4yNzYgODU1LjIzOCA1NTQuODM3IDg1Ny4wODQgNTQ2LjAxNCA4MTMuMTczIDU1OC41MzEgODEwLjcxMSA1OTMuNDEzIDg0Mi43MjFaIiBmaWxsPSIjODlEN0NFIiBmaWxsLXJ1bGU9Im5vbnplcm8iIGZpbGwtb3BhY2l0eT0iMSIgdHJhbnNmb3JtPSJtYXRyaXgoMSAwIDAgMS4wMDA4MyAyMTIuNTU1IC0yMDcpIi8+PHBhdGggZD0iTTYzOC45NjYgNzk0LjcwNkM2NDIuNDU0IDc5NC4wOTEgNjQ1LjMyNyA3OTQuMDkxIDY0OC4xOTkgNzk0LjcwNiA2NTAuODY3IDc5NS4zMjIgNjUzLjEyNCA3OTYuNzU4IDY1NC45NzEgNzk4LjYwNSA2NTYuODE4IDgwMC40NTEgNjU3Ljg0NCA4MDIuOTE0IDY1OC40NTkgODA1Ljc4NiA2NTkuMDc1IDgwOC42NTkgNjU4Ljg2OSA4MTEuMzI3IDY1OC4wNDkgODEzLjc4OSA2NTcuMjI4IDgxNi4yNTEgNjU1LjU4NiA4MTguMzAzIDY1My4zMjkgODE5Ljk0NSA2NTEuMDcyIDgyMS41ODYgNjQ4LjE5OSA4MjIuODE3IDY0NC45MTYgODIzLjYzOEw2MjYuMDM5IDgyNy4zMzIgNjI0LjM5NyA4MTkuMTI0IDY0Mi44NjUgODE1LjQzQzY0NS4xMjIgODE1LjAyIDY0Ni43NjMgODEzLjk5NCA2NDcuNzg5IDgxMi43NjMgNjQ4LjgxNSA4MTEuMzI3IDY0OS4yMjUgODA5LjY4NSA2NDguODE1IDgwNy44MzggNjQ4LjQwNSA4MDUuNzg2IDY0Ny4zNzkgODA0LjM1IDY0NS45NDIgODAzLjUyOSA2NDQuNTA2IDgwMi43MDkgNjQyLjY1OSA4MDIuNTAzIDY0MC40MDIgODAyLjkxNEw2MjIuNzU2IDgwNi40MDIgNjI2LjI0NCA4MDAuODYyIDYzNC4yNDYgODQxLjI4NSA2MjQuNjAyIDg0My4xMzEgNjE1Ljc3OSA3OTkuMjIgNjM4Ljk2NiA3OTQuNzA2WiIgZmlsbD0iIzg5RDdDRSIgZmlsbC1ydWxlPSJub256ZXJvIiBmaWxsLW9wYWNpdHk9IjEiIHRyYW5zZm9ybT0ibWF0cml4KDEgMCAwIDEuMDAwODMgMjEyLjU1NSAtMjA3KSIvPjxwYXRoIGQ9Ik02ODQuMzEzIDc4NS42NzggNzEzLjI0NSA4MjUuNjkgNzAyLjc4IDgyNy43NDIgNjc3LjMzNyA3OTEuNDIzIDY4MC42MiA3OTAuODA3IDY3MC45NzYgODM0LjMwOCA2NjAuNTExIDgzNi4zNiA2NzEuNzk2IDc4OC4zNDUgNjg0LjMxMyA3ODUuNjc4Wk02NjkuOTUgODI0LjY2NCA2NjguMzA4IDgxNi42NjIgNjk4LjA2MSA4MTAuNzExIDY5OS43MDMgODE4LjcxNCA2NjkuOTUgODI0LjY2NFoiIGZpbGw9IiM4OUQ3Q0UiIGZpbGwtcnVsZT0ibm9uemVybyIgZmlsbC1vcGFjaXR5PSIxIiB0cmFuc2Zvcm09Im1hdHJpeCgxIDAgMCAxLjAwMDgzIDIxMi41NTUgLTIwNykiLz48cGF0aCBkPSJNNzE5LjgxMSA3OTkuMDE1IDczNi40MzIgNzk1LjczMkM3MzguNjg5IDc5NS4zMjIgNzQwLjMzIDc5NC41MDEgNzQxLjM1NiA3OTMuMDY1IDc0Mi4zODIgNzkxLjYyOCA3NDIuNzkzIDc5MC4xOTIgNzQyLjM4MiA3ODguMzQ1IDc0MS45NzIgNzg2LjQ5OCA3NDEuMTUxIDc4NS4yNjcgNzM5LjcxNSA3ODQuNDQ3IDczOC4yNzggNzgzLjYyNiA3MzYuNDMyIDc4My40MjEgNzM0LjE3NSA3ODQuMDM2TDcxNi4xMTggNzg3LjUyNCA3MTkuNjA2IDc4MS41NzQgNzI3LjgxNCA4MjIuODE3IDcxOC4xNyA4MjQuNjY0IDcwOS4zNDYgNzgwLjc1MyA3MzMuNzY0IDc3NS44MjhDNzM2Ljg0MiA3NzUuMjEzIDczOS43MTUgNzc1LjIxMyA3NDIuMzgyIDc3NS44MjggNzQ1LjA1IDc3Ni40NDQgNzQ3LjEwMiA3NzcuNjc1IDc0OC45NDggNzc5LjUyMiA3NTAuNzk1IDc4MS4zNjkgNzUxLjgyMSA3ODMuNjI2IDc1Mi40MzcgNzg2LjI5MyA3NTMuMDUyIDc4OC45NjEgNzUyLjg0NyA3OTEuNDIzIDc1MS44MjEgNzkzLjg4NSA3NTAuNzk1IDc5Ni4xNDIgNzQ5LjM1OSA3OTguMTk0IDc0Ny4zMDcgNzk5LjgzNiA3NDUuMjU1IDgwMS40NzcgNzQyLjU4NyA4MDIuNTAzIDczOS4zMDQgODAzLjExOUw3MjEuNjU4IDgwNi42MDcgNzE5LjgxMSA3OTkuMDE1Wk03MjguMDE5IDgwMS4yNzIgNzM5LjA5OSA3OTkuMDE1IDc1OS40MTMgODE2LjQ1NiA3NDcuOTIyIDgxOC43MTQgNzI4LjAxOSA4MDEuMjcyWiIgZmlsbD0iIzg5RDdDRSIgZmlsbC1ydWxlPSJub256ZXJvIiBmaWxsLW9wYWNpdHk9IjEiIHRyYW5zZm9ybT0ibWF0cml4KDEgMCAwIDEuMDAwODMgMjEyLjU1NSAtMjA3KSIvPjxwYXRoIGQ9Ik03NjUuMzY0IDgxNS4yMjUgNzU2LjU0MSA3NzEuMzE0IDc2Ni4xODUgNzY5LjQ2OCA3NzMuMzY2IDgwNS4zNzYgNzcwLjI4OCA4MDMuOTQgNzkwLjE5MiA3NjQuNzQ4IDgwMC42NTcgNzYyLjY5NiA3NzQuMTg3IDgxMy41ODQgNzY1LjM2NCA4MTUuMjI1Wk03ODEuNTc0IDc4OS43ODEgNzg3LjMxOSA3ODEuOTg0IDgwOS44OSA4MDYuNDAyIDc5OC44MSA4MDguNjU5IDc4MS41NzQgNzg5Ljc4MVoiIGZpbGw9IiM4OUQ3Q0UiIGZpbGwtcnVsZT0ibm9uemVybyIgZmlsbC1vcGFjaXR5PSIxIiB0cmFuc2Zvcm09Im1hdHJpeCgxIDAgMCAxLjAwMDgzIDIxMi41NTUgLTIwNykiLz48cGF0aCBkPSJNMzg0LjUyOSA1MjIuMDA3QzM5MC4wNjkgNTI1LjI5IDM5NS42MDkgNTI2LjkzMSA0MDAuNzM5IDUyNy4xMzcgNDA2LjA3NCA1MjcuMzQyIDQxMC45OTggNTI2LjExMSA0MTUuMzA3IDUyMy4yMzggNDE5LjgyMiA1MjAuMzY1IDQyMy43MiA1MTYuMjYxIDQyNi43OTggNTEwLjcyMSA0MzAuMDgxIDUwNS4xODEgNDMxLjcyMyA0OTkuNjQxIDQzMS45MjggNDk0LjUxMSA0MzIuMTMzIDQ4OS4zODEgNDMwLjY5NyA0ODQuNDU3IDQyOC4wMjkgNDc5Ljk0MyA0MjUuMzYyIDQ3NS40MjggNDIxLjA1MyA0NzEuNzM1IDQxNS41MTIgNDY4LjQ1MiA0MDkuNzY3IDQ2NS4xNjkgNDA0LjQzMiA0NjMuMzIyIDM5OS4wOTcgNDYzLjExNyAzOTMuOTY3IDQ2Mi45MTIgMzg5LjA0MyA0NjQuMTQzIDM4NC41MjkgNDY3LjAxNiAzODAuMDE0IDQ2OS42ODMgMzc2LjMyMSA0NzMuOTkyIDM3My4wMzggNDc5LjUzMiAzNjkuNzU1IDQ4NS4wNzIgMzY4LjExMyA0OTAuNjEzIDM2Ny45MDggNDk1Ljc0MiAzNjcuNzAzIDUwMS4wNzcgMzY4LjkzNCA1MDUuNzk3IDM3MS44MDcgNTEwLjMxMSAzNzQuODg1IDUxNS4wMyAzNzguOTg4IDUxOC43MjQgMzg0LjUyOSA1MjIuMDA3WiIgZmlsbD0iIzg5RDdDRSIgZmlsbC1ydWxlPSJub256ZXJvIiBmaWxsLW9wYWNpdHk9IjEiIHRyYW5zZm9ybT0ibWF0cml4KDEgMCAwIDEuMDAwODMgMjEyLjU1NSAtMjA3KSIvPjxwYXRoIGQ9Ik00NjEuNjgxIDM4OS4yNDhDNDY3LjIyMSAzOTIuNTMxIDQ3Mi43NjEgMzk0LjE3MyA0NzcuODkxIDM5NC4zNzggNDgzLjIyNiAzOTQuNTgzIDQ4OC4xNSAzOTMuMzUyIDQ5Mi40NTkgMzkwLjQ3OSA0OTYuOTczIDM4Ny42MDYgNTAwLjg3MiAzODMuNTAzIDUwMy45NSAzNzcuOTYyIDUwNy4yMzMgMzcyLjQyMiA1MDguODc1IDM2Ni44ODIgNTA5LjA4IDM2MS43NTIgNTA5LjI4NSAzNTYuNjIzIDUwNy44NDkgMzUxLjY5OCA1MDUuMTgxIDM0Ny4xODQgNTAyLjUxNCAzNDIuNjcgNDk4LjIwNSAzMzguOTc2IDQ5Mi42NjQgMzM1LjY5MyA0ODYuOTE5IDMzMi40MSA0ODEuNTg0IDMzMC41NjMgNDc2LjI0OSAzMzAuMzU4IDQ3MS4xMTkgMzMwLjE1MyA0NjYuMTk1IDMzMS4zODQgNDYxLjY4MSAzMzQuMjU3IDQ1Ny4xNjYgMzM2LjkyNCA0NTMuNDczIDM0MS4yMzMgNDUwLjE5IDM0Ni43NzMgNDQ2LjkwNyAzNTIuMzE0IDQ0NS4yNjUgMzU3Ljg1NCA0NDUuMDYgMzYyLjk4MyA0NDQuODU1IDM2OC4zMTggNDQ2LjA4NiAzNzMuMDM4IDQ0OC45NTkgMzc3LjU1MiA0NTIuMDM3IDM4Mi4wNjYgNDU2LjE0IDM4NS45NjUgNDYxLjY4MSAzODkuMjQ4WiIgZmlsbD0iIzg5RDdDRSIgZmlsbC1ydWxlPSJub256ZXJvIiBmaWxsLW9wYWNpdHk9IjEiIHRyYW5zZm9ybT0ibWF0cml4KDEgMCAwIDEuMDAwODMgMjEyLjU1NSAtMjA3KSIvPjxwYXRoIGQ9Ik0zMDcuMTcxIDY0OC44MTUgMjgwLjI5MSA2MzMuMjIxIDI4OS43MyA2MTcuMjE2IDI4My4xNjQgNjEzLjMxN0MyNzMuMzE1IDYwNy41NzIgMjY1LjkyOCA2MDAuOCAyNjEuMjA5IDU5My4wMDMgMjU2LjQ4OSA1ODUuMjA2IDI1NC40MzcgNTc2LjM4MyAyNTUuMDUzIDU2Ni45NDQgMjU1LjY2OCA1NTcuNTA1IDI1OS4zNjIgNTQ3LjI0NSAyNjUuNzIzIDUzNi4xNjUgMjY4LjU5NSA1MzEuMjQgMjcxLjQ2OCA1MjcuMTM3IDI3NC4zNDEgNTIzLjY0OCAyNzcuMjE0IDUyMC4xNiAyODAuNzAyIDUxNi42NzIgMjg0LjYgNTEzLjE4NEwzMTEuNDggNTI4Ljc3OEMzMDguMTk3IDUzMS40NDYgMzA1LjMyNSA1MzQuMzE4IDMwMi42NTcgNTM3LjM5NiAyOTkuOTkgNTQwLjQ3NCAyOTcuNTI3IDU0My45NjIgMjk1LjQ3NiA1NDcuODYxIDI5MS4xNjcgNTU1LjQ1MyAyODkuNTI1IDU2MS40MDQgMjkwLjU1MSA1NjUuOTE4IDI5MS41NzcgNTcwLjQzMiAyOTUuMjcgNTc0LjUzNiAzMDEuNDI2IDU3OC4yMjlMMzEwLjA0NCA1ODMuMzU5IDMyNy42OTEgNTUzLjQwMSAzNTQuNTcxIDU2OC45OTYgMzM2LjkyNCA1OTkuMTU5IDM5Ny42NjEgNjM0Ljg2MiA4MDMuOTQgMTAyLjU5NiA0MTMuMDUgMCAxOTguMDEgNjI4LjI5NiAzNDIuMjU5IDcwNi40NzQgMzcyLjgzMyA2NjYuNDYxIDMxNi4yIDYzMy4yMjEgMzA3LjE3MSA2NDguODE1Wk00NTQuOTA5IDIwMi4xMTMgNTkyLjM4NyAyODEuOTMzIDU3Mi40ODQgMzE2LjQwNSA0MzUuMDA2IDIzNi41ODYgNDU0LjkwOSAyMDIuMTEzWk00MTEuNDA5IDM2Ny4yOTNDNDEyLjIyOSAzNTUuNTk3IDQxNi4xMjggMzQzLjQ5IDQyMy4zMSAzMzEuMTc5IDQzMC4yODYgMzE5LjA3MyA0MzguOTA0IDMwOS42MzQgNDQ4Ljc1MyAzMDMuMDY4IDQ1OC42MDMgMjk2LjUwMSA0NjkuMDY3IDI5My4wMTMgNDgwLjE0OCAyOTIuNjAzIDQ5MS4yMjggMjkyLjE5MiA1MDIuMTAzIDI5NS4wNjUgNTEyLjc3MyAzMDEuMjIxIDUyMy40NDMgMzA3LjM3NyA1MzEuNDQ2IDMxNS41ODQgNTM2LjU3NSAzMjUuNDM0IDU0MS43MDUgMzM1LjI4MyA1NDMuOTYyIDM0Ni4xNTggNTQyLjkzNiAzNTguMDU5IDU0Mi4xMTYgMzY5Ljk2IDUzOC4wMTIgMzgxLjg2MSA1MzEuMDM1IDM5My45NjcgNTIzLjg1NCA0MDYuMjc5IDUxNS40NDEgNDE1LjcxOCA1MDUuNTkxIDQyMi4yODQgNDk1Ljc0MiA0MjguODUgNDg1LjI3OCA0MzIuMzM4IDQ3NC4xOTcgNDMyLjc0OSA0NjMuMTE3IDQzMy4xNTkgNDUyLjI0MiA0MzAuMjg2IDQ0MS41NzIgNDI0LjEzMSA0MzAuNjk3IDQxNy43NyA0MjIuNjk0IDQwOS43NjcgNDE3LjU2NCAzOTkuOTE4IDQxMi44NDUgMzg5Ljg2NCA0MTAuNzkzIDM3OC45ODggNDExLjQwOSAzNjcuMjkzWk0zMzQuNDYyIDUwMC4wNTFDMzM1LjI4MyA0ODguMzU1IDMzOS4xODEgNDc2LjI0OSAzNDYuMzYzIDQ2My45MzggMzUzLjM0IDQ1MS44MzEgMzYxLjk1OCA0NDIuMzkzIDM3MS44MDcgNDM1LjgyNiAzODEuNjU2IDQyOS4yNiAzOTIuMTIxIDQyNS43NzIgNDAzLjIwMSA0MjUuMzYyIDQxNC4yODEgNDI0Ljk1MSA0MjUuMTU2IDQyNy44MjQgNDM1LjgyNiA0MzMuOTggNDQ2LjQ5NiA0NDAuMTM1IDQ1NC40OTkgNDQ4LjM0MyA0NTkuNjI5IDQ1OC4xOTIgNDY0Ljc1OCA0NjguMDQxIDQ2Ny4wMTYgNDc4LjkxNyA0NjUuOTkgNDkwLjgxOCA0NjUuMTY5IDUwMi43MTkgNDYxLjA2NSA1MTQuNjIgNDU0LjA4OCA1MjYuNzI2IDQ0Ni45MDcgNTM5LjAzOCA0MzguNDk0IDU0OC40NzYgNDI4LjY0NSA1NTUuMDQzIDQxOC43OTYgNTYxLjYwOSA0MDguMzMxIDU2NS4wOTcgMzk3LjI1IDU2NS41MDcgMzg2LjE3IDU2NS45MTggMzc1LjI5NSA1NjMuMDQ1IDM2NC42MjUgNTU2Ljg4OSAzNTMuNzUgNTUwLjUyOCAzNDUuNzQ3IDU0Mi41MjYgMzQwLjYxOCA1MzIuNjc3IDMzNS42OTMgNTIyLjYyMiAzMzMuNjQxIDUxMS43NDcgMzM0LjQ2MiA1MDAuMDUxWiIgZmlsbD0iIzg5RDdDRSIgZmlsbC1ydWxlPSJub256ZXJvIiBmaWxsLW9wYWNpdHk9IjEiIHRyYW5zZm9ybT0ibWF0cml4KDEgMCAwIDEuMDAwODMgMjEyLjU1NSAtMjA3KSIvPjxwYXRoIGQ9Ik0xOTAuODI4IDgzNS45NUMxODQuODc3IDgzNC41MTMgMTc4LjkyNyA4MzQuMTAzIDE3My4xODIgODM0LjkyNCAxNjcuNDM2IDgzNS43NDQgMTYyLjEwMSA4MzcuMzg2IDE1Ny41ODcgODQwLjI1OSAxNTIuODY4IDg0Mi45MjYgMTQ5LjE3NCA4NDYuODI1IDE0Ni4zMDEgODUxLjMzOSAxNDMuNjM0IDg1NS44NTMgMTQyLjQwMyA4NjAuMzY3IDE0Mi42MDggODY1LjA4NyAxNDIuODEzIDg2OS44MDYgMTQ0LjI1IDg3NC4zMiAxNDYuOTE3IDg3OC42MjkgMTQ5LjU4NSA4ODIuOTM4IDE1My40ODMgODg2LjYzMiAxNTguNjEzIDg4OS43MSAxNjMuNTM4IDg5Mi41ODIgMTY4LjY2NyA4OTQuNDI5IDE3My41OTIgODk0LjgzOSAxNzguNzIyIDg5NS4yNSAxODMuMjM2IDg5NC40MjkgMTg3LjU0NSA4OTIuMTcyIDE5MS44NTQgODkwLjEyIDE5NS4zNDIgODg2LjgzNyAxOTcuODA0IDg4Mi4zMjMgMjAwLjY3NyA4NzcuNjAzIDIwMi4xMTMgODcyLjY3OSAyMDIuMzE5IDg2Ny4xMzkgMjAyLjUyNCA4NjEuODA0IDIwMS43MDMgODU2LjI2MyAxOTkuNjUxIDg1MC45MjkgMTk3LjgwNCA4NDUuMzg4IDE5NC43MjcgODQwLjQ2NCAxOTAuODI4IDgzNS45NVoiIGZpbGw9IiM4OUQ3Q0UiIGZpbGwtcnVsZT0ibm9uemVybyIgZmlsbC1vcGFjaXR5PSIxIiB0cmFuc2Zvcm09Im1hdHJpeCgxIDAgMCAxLjAwMDgzIDIxMi41NTUgLTIwNykiLz48cGF0aCBkPSJNMzM5LjE4MSA4NTcuNDk1QzMzOC4xNTUgODMwLjgyIDMyOS41MzcgODA1LjE3MSAzMTMuNTMyIDc4MS4zNjkgMjk3LjczMyA3NTcuNTY2IDI3NC43NTEgNzM3LjA0NyAyNDUuNjE0IDcyMC4wMTYgMjE2LjA2NiA3MDIuOTg2IDE4Ni43MjQgNjkzLjM0MiAxNTguNDA4IDY5MS4yOSAxMjkuODg2IDY4OS40NDMgMTAzLjQxNiA2OTQuNTczIDc5LjYxNDIgNzA2Ljg4NCA1NS44MTIgNzE5LjE5NiAzNi4xMTM3IDczOC42ODkgMjAuOTI5NSA3NjQuNzQ4IDYuMTU1NzQgNzkwLjE5Mi0xLjAyNTk2IDgxNi44NjcgMCA4NDMuNzQ3IDEuMDI1OTYgODcwLjYyNyA5LjQzODggODk2LjI3NiAyNS40NDM3IDkxOS44NzMgNDEuMjQzNSA5NDMuMjY1IDY0LjIyNDkgOTYzLjk4OSA5My43NzI0IDk4MS4wMiAxMjIuOTEgOTk3Ljg0NiAxNTIuMjUyIDEwMDcuNjkgMTgwLjU2OCAxMDA5Ljc1IDE4NC42NzIgMTAxMC4xNiAxODguNzc2IDEwMTAuMTYgMTkyLjg4IDEwMTAuMTYgMjE2LjY4MiAxMDEwLjE2IDIzOS4wNDggMTAwNC44MiAyNTkuNTY3IDk5NC4xNTIgMjgzLjM2OSA5ODEuNjM1IDMwMy4yNzMgOTYyLjM0NyAzMTguMjUyIDkzNi40OTMgMzMzLjAyNiA5MTEuMDUgMzQwLjIwNyA4ODQuMzc1IDMzOS4xODEgODU3LjQ5NVpNMjQyLjc0MSA4NjMuODU2IDIxOS43NiA4NTMuNTk2QzIyNC42ODUgODYyLjYyNCAyMjcuMTQ3IDg3MS44NTggMjI3LjM1MiA4ODEuMDkyIDIyNy41NTcgODkwLjczNiAyMjQuODkgOTAwLjE3NCAyMTkuNTU1IDkwOS4yMDMgMjE0LjAxNSA5MTguNDM3IDIwNi44MzMgOTI1LjQxMyAxOTguMjE1IDkyOS43MjIgMTg5LjU5NyA5MzQuMDMxIDE3OS45NTMgOTM1Ljg3OCAxNjkuNDg4IDkzNS4wNTcgMTU5LjAyMyA5MzQuMjM2IDE0OC41NTkgOTMwLjU0MyAxMzguMDk0IDkyNC4zODcgMTI3LjQyNCA5MTguMDI2IDExOS4yMTYgOTEwLjIyOSAxMTMuNDcxIDkwMS42MTEgMTA3LjkzMSA4OTIuNzg4IDEwNC44NTMgODgzLjU1NCAxMDQuNjQ4IDg3My45MSAxMDQuNDQyIDg2NC4yNjYgMTA3LjExIDg1NC42MjIgMTEyLjY1IDg0NS4zODggMTE3Ljk4NSA4MzYuMzYgMTI0Ljk2MiA4MjkuNzk0IDEzMy43ODUgODI1LjI4IDE0MS45OTIgODIxLjE3NiAxNTEuMDIxIDgxOS4xMjQgMTYxLjA3NSA4MTguOTE5TDEwOC43NTEgNzc4LjkwNiAxMjkuODg2IDc0My42MTMgMjA3LjAzOCA4MDMuMTE5IDI2My44NzYgODI5LjE3OCAyNDIuNzQxIDg2My44NTZaIiBmaWxsPSIjODlEN0NFIiBmaWxsLXJ1bGU9Im5vbnplcm8iIGZpbGwtb3BhY2l0eT0iMSIgdHJhbnNmb3JtPSJtYXRyaXgoMSAwIDAgMS4wMDA4MyAyMTIuNTU1IC0yMDcpIi8+PC9nPjwvZz48L2c+PC9nPjwvZz48L3N2Zz4="
+    };
+    document.querySelectorAll("img[data-logo]").forEach(img => {
+      img.src = LOGOS[img.dataset.logo];
+    });
+
+    /* ==========================================================
+       PONT JS → TASKER
+       ----------------------------------------------------------
+       Rappel du mécanisme :
+       1. On appuie sur "Lancer ce mode" -> son data-action ("mode1"...)
+          est lu.
+       2. On change l'URL de la page vers "tasker:<action>".
+       3. Tasker intercepte cette tentative de navigation (réglage
+          "Toucher de lien" sur l'élément WebView côté Tasker) et lit
+          le texte complet dans sa variable %url.
+       4. Une tâche Tasker compare %url à des motifs (*mode1*...)
+          et déclenche l'action correspondante.
+       ========================================================== */
+
+    // navigateToTasker() est appelée UNIQUEMENT par le bouton "Lancer".
+    // "action" = le texte "mode1", "mode2", etc.
+    function navigateToTasker(action) {
+      showToast(labelFor(action));       // affiche le petit message
+      window.location.href = "tasker:" + action; // envoie le signal
+    }
+
+    // Traduit le nom technique de l'action en texte lisible pour
+    // l'utilisateur (uniquement pour l'affichage du toast).
+    function labelFor(action) {
+      const map = {
+        mode1: "Mode 2 couleurs",
+        mode2: "Mode 3 couleurs",
+        mode3: "Mode 4 couleurs",
+        mode4: "Mode 5 couleurs",
+        mode5: "Mode 6 couleurs",
+        mode6: "Mode tout éteindre",
+      };
+      return map[action] || action; // si l'action n'est pas dans la
+                                     // liste, affiche son nom brut
+    }
+
+    // Affiche le toast avec le texte donné, puis le fait disparaître
+    // tout seul après 1.6 seconde.
+    function showToast(text) {
+      const toast = document.getElementById("toast");
+      toast.textContent = text;           // change le texte affiché
+      toast.classList.add("show");        // déclenche l'animation CSS
+
+      // Si un timer précédent tournait encore (clics rapides successifs),
+      // on l'annule avant d'en relancer un nouveau.
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(() => toast.classList.remove("show"), 1600);
+    }
+
+    /* ==========================================================
+       SÉLECTION D'UN MODE — remplit la zone d'explication fixe
+       ----------------------------------------------------------
+       Au clic sur une case :
+       1. on retire .selected de la case choisie précédemment
+       2. on l'ajoute à la nouvelle (bordure jaune)
+       3. on recopie SON texte caché (.explication) dans la zone fixe
+          du haut, et on affiche le bouton "Lancer ce mode" en lui
+          donnant le bon data-action.
+       IMPORTANT : cliquer sur une case N'ENVOIE RIEN à Tasker.
+       ========================================================== */
+    const detail = document.getElementById("detail");
+    const detailText = document.getElementById("detailText");
+    const launchBtn = document.getElementById("launchBtn");
+
+    document.querySelectorAll(".mode-card").forEach(card => {
+      card.addEventListener("touchstart", () => card.classList.add("pressed"), { passive: true });
+      card.addEventListener("touchend", () => card.classList.remove("pressed"), { passive: true });
+      card.addEventListener("touchcancel", () => card.classList.remove("pressed"), { passive: true });
+
+      card.addEventListener("click", () => {
+        document.querySelectorAll(".mode-card.selected").forEach(c => c.classList.remove("selected"));
+        card.classList.add("selected");
+
+        detailText.textContent = card.querySelector(".explication").textContent;
+        launchBtn.dataset.action = card.dataset.action;
+        launchBtn.hidden = false;
+        detail.classList.add("filled");
+      });
+    });
+
+    /* ==========================================================
+       BOUTON "LANCER CE MODE" — le SEUL endroit qui parle à Tasker
+       ----------------------------------------------------------
+       On cible launchBtn directement (et non "tout ce qui a un
+       data-action", qui incluait aussi les cartes et les faisait
+       envoyer la commande dès le premier tap).
+       Son data-action change à chaque sélection de carte ; on le lit
+       AU MOMENT du clic, donc il suit toujours le dernier mode choisi.
+       Le test "if" évite d'envoyer une commande vide.
+       ========================================================== */
+    launchBtn.addEventListener("touchstart", () => launchBtn.classList.add("pressed"), { passive: true });
+    launchBtn.addEventListener("touchend", () => launchBtn.classList.remove("pressed"), { passive: true });
+    launchBtn.addEventListener("touchcancel", () => launchBtn.classList.remove("pressed"), { passive: true });
+    launchBtn.addEventListener("click", () => {
+      if (launchBtn.dataset.action) navigateToTasker(launchBtn.dataset.action);
+    });
+
+    // Force le document à rester en haut quand le viewport visible change
+    // (barre d'URL, clavier, rotation, redimensionnement).
+    function keepPageAtTop() {
+      const viewportHeight = window.visualViewport
+        ? window.visualViewport.height
+        : window.innerHeight;
+
+      document.documentElement.style.setProperty('--app-height', `${viewportHeight}px`);
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+
+      const detailBox = document.querySelector('.detail');
+      if (detailBox) detailBox.scrollTop = 0;
+    }
+
+    window.addEventListener("resize", keepPageAtTop);
+    window.addEventListener("orientationchange", keepPageAtTop);
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", keepPageAtTop);
+      window.visualViewport.addEventListener("scroll", () => {
+        if (window.scrollY > 0 || document.documentElement.scrollTop > 0) {
+          keepPageAtTop();
+        }
+      });
+    }
+    keepPageAtTop();
+
+    // Bloque le pincement-zoom (gesture iOS/Safari). Le blocage des
+    // swipes se fait maintenant en CSS (touch-action), plus en JS : l'ancien
+    // blocage de "touchmove" annulait aussi les taps dès que le doigt
+    // bougeait légèrement, ce qui empêchait les clics sur la tablette.
+    document.addEventListener("gesturestart", e => e.preventDefault());
+  </script>
+
+</body>
+</html>
